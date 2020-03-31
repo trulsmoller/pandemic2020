@@ -143,7 +143,7 @@ def return_figures():
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Infected<br>per 100,000',
+            colorbar_title = 'Infected<br>per 100,000<br>',
             )
         )
 
