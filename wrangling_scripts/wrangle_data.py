@@ -177,25 +177,26 @@ def return_figures():
 
     graph_one = []
     df = prepare_geo()
-    df = df[['Country', 'Short', 'Infected_per_100k']]
-    df.sort_values('Infected_per_100k', ascending=False, inplace=True)
+    df = df[['Country', 'Short', 'Infected_percent']]
+    df.sort_values('Infected_percent', ascending=False, inplace=True)
 
     graph_one.append(
         go.Choropleth(
             locations = df['Short'],
-            z = df['Infected_per_100k'],
+            z = df['Infected_percent'],
             text = df['Country'],
             colorscale = 'Viridis_r',
             autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Infected<br>per 100,000<br>',
+            colorbar_title = 'Infected Percent',
+            colorbar_tickprefix = '%',
             )
         )
 
     layout_one = dict(
-        title = 'Global Infected per 100,000 people',
+        title = 'Currently Infected in Percent',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -213,9 +214,9 @@ def return_figures():
       )
     )
 
-    layout_two = dict(title = 'Top 20 Most Deaths per 100,000',
+    layout_two = dict(title = 'Top 20 Most Deaths per 100,000 people',
                 xaxis = dict(title = 'Country',),
-                yaxis = dict(title = 'Deaths per 100,000'),
+                yaxis = dict(title = 'Deaths per 100k'),
                 )
 
 
