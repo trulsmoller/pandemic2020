@@ -157,7 +157,7 @@ def prepare_bar(var, continent = None, top_n = None):
         continent = "The World"
 
     df = df.sort_values(by=[var], ascending=False).loc[:, var_list][:top_n].reset_index()
-
+    df = df.sort_values(by=[var], ascending=True)
     return df
 
 
@@ -216,8 +216,8 @@ def return_figures():
     )
 
     layout_two = dict(title = 'Top 20 Most Deaths per 100,000 people',
-                xaxis = dict(title = 'Country',),
-                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = 'Deaths per 100k'),
+                yaxis = dict(title = 'Country'),
                 )
 
 
