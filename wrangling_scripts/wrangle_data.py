@@ -209,8 +209,8 @@ def return_figures():
 
     graph_two.append(
       go.Bar(
-      x = df.Country.tolist(),
-      y = df.Deaths_per_100k.tolist(),
+      x = df.Deaths_per_100k.tolist(),
+      y = df.Country.tolist(),
       orientation = 'h',
       )
     )
