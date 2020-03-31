@@ -138,7 +138,7 @@ def return_figures():
             locations = df['Short'],
             z = df['Infected_per_100k'],
             text = df['Country'],
-            colorscale = 'Blues',
+            colorscale = 'Viridis',
             autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray',
