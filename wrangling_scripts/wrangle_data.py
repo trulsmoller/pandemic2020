@@ -211,6 +211,7 @@ def return_figures():
       go.Bar(
       x = df.Country.tolist(),
       y = df.Deaths_per_100k.tolist(),
+      orientaion = 'h',
       )
     )
 
