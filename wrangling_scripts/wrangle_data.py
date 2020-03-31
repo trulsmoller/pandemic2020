@@ -196,7 +196,7 @@ def return_figures():
         )
 
     layout_one = dict(
-        title = 'The World - Percent of Population Infected',
+        title = 'All Countries: Percent of Population Currently Infected',
         geo=dict(
             showframe=False,
             showcoastlines=False,
