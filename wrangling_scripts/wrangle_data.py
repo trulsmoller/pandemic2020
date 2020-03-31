@@ -191,12 +191,12 @@ def return_figures():
             marker_line_color='darkgray',
             marker_line_width=0.5,
             colorbar_title = 'Infected Percent',
-            colorbar_tickprefix = '%',
+            colorbar_ticksuffix = '%',
             )
         )
 
     layout_one = dict(
-        title = 'Currently Infected in Percent',
+        title = 'Currently Infected Globally in Percent',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -217,7 +217,7 @@ def return_figures():
 
     layout_two = dict(title = 'Top 20 Most Deaths per 100,000 people',
                 xaxis = dict(title = 'Deaths per 100k'),
-                yaxis = dict(title = 'Country'),
+                yaxis = dict(title = ''),
                 )
 
 
