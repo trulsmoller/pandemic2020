@@ -105,7 +105,7 @@ def prepare_geo():
     gdf = gdf[['Country', 'Short', 'geometry']]
 
 
-    df_all = df_prepare('data/covid_19_data.csv', 'web_app/data/population_2020_for_johnhopkins_data.csv',
+    df_all = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
                     historical = False,
                     continent = None)
 
