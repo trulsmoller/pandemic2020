@@ -190,13 +190,13 @@ def return_figures():
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Infected Percent',
+            colorbar_title = 'Infected',
             colorbar_ticksuffix = '%',
             )
         )
 
     layout_one = dict(
-        title = 'Currently Infected Globally in Percent',
+        title = 'The World - Percent of Population Infected',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -205,7 +205,7 @@ def return_figures():
         )
 
     graph_two = []
-    df = prepare_bar('Deaths_per_100k', continent = '', top_n = 20)
+    df = prepare_bar('Deaths_per_100k', continent = '', top_n = 15)
 
     graph_two.append(
       go.Bar(
@@ -215,7 +215,7 @@ def return_figures():
       )
     )
 
-    layout_two = dict(title = 'Top 20 Most Deaths per 100,000 people',
+    layout_two = dict(title = 'Countries with Highest Ratio of Deaths',
                 xaxis = dict(title = 'Deaths per 100k'),
                 yaxis = dict(title = ''),
                 )
