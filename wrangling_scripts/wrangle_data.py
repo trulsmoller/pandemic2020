@@ -114,6 +114,53 @@ def prepare_geo():
     return df
 
 
+def prepare_bar(var, continent = None, top_n = None):
+
+    var_list_abs = ['Infected', 'Recovered', 'Deaths']
+    var_list_rel1 = ['Infected_percent', 'Recovered_percent', 'Deaths_percent']
+    var_list_rel2 = ['Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']
+
+    continent_list = ['America', 'Europe', 'Asia', 'Africa', 'Oceania']
+
+    if continent:
+        assert continent in continent_list
+
+
+    keyword1 = '_percent'
+    keyword2 = '_per_100k'
+
+    if keyword1 in var:
+
+        stat = '(relative to population)'
+        var_list = var_list_rel1
+
+    elif keyword2 in var:
+
+        stat = '(relative to population)'
+        var_list = var_list_rel2
+
+    else:
+        stat = ''
+        var_list = var_list_abs
+
+
+    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
+                    historical = False,
+                    continent = continent)
+
+    if top_n:
+        tot_countries = df.shape[0]
+        if top_n > tot_countries:
+            top_n = tot_countries
+
+    if not continent:
+        continent = "The World"
+
+    df = df.sort_values(by=[var], ascending=False).loc[:, var_list][:top_n].reset_index()
+
+    return df
+
+
 def return_figures():
     """Creates four plotly visualizations
 
@@ -156,10 +203,25 @@ def return_figures():
             )
         )
 
+    graph_two = []
+    df = prepare_bar('Deaths_per_100k', continent = '', top_n = 20)
+
+    graph_two.append(
+      go.Bar(
+      x = df.Country.tolist(),
+      y = df.Deaths_per_100k.tolist(),
+      )
+    )
+
+    layout_two = dict(title = 'Top 20 Most Deaths per 100,000',
+                xaxis = dict(title = 'Country',),
+                yaxis = dict(title = 'Deaths per 100,000'),
+                )
 
 
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append(dict(data=graph_two, layout=layout_two))
 
     return figures
