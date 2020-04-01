@@ -240,10 +240,10 @@ def return_figures():
         )
 
 
-    
+
 
     graph_two = []
-    df = prepare_bar('Deaths_per_100k', continent = '', top_n = 15)
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 15)
 
     graph_two.append(
       go.Bar(
@@ -253,7 +253,7 @@ def return_figures():
       )
     )
 
-    layout_two = dict(title = 'Countries with Highest Ratio of Deaths',
+    layout_two = dict(title = 'European Countries with High Ratio of Deaths',
                 xaxis = dict(title = 'Deaths per 100k'),
                 yaxis = dict(title = ''),
                 )
