@@ -261,9 +261,9 @@ def return_figures():
     df = df[df.Country.isin(country_list)]
 
     for country in countrylist:
-      x_val = df[df['Country'] == country].Date.astype('str').tolist()
+      x_val = df[df['Country'] == country].Date.tolist()
       y_val =  df[df['Country'] == country].Infected_percent.tolist()
-      graph_one.append(
+      graph_three.append(
           go.Scatter(
           x = x_val,
           y = y_val,
