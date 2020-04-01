@@ -258,7 +258,7 @@ def return_figures():
     graph_three = []
     countrylist, df = prepare_time('Infected_percent', continent = '', top_n = 15)
 
-    df = df[df.Country.isin(country_list)]
+    df = df[df.Country.isin(countrylist)]
 
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
