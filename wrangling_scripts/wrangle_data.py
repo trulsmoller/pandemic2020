@@ -273,10 +273,9 @@ def return_figures():
       )
 
     layout_three = dict(title = 'Percent of Population Infected',
-                xaxis = dict(title = 'Date',
-                  autotick=True),
+                xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Infected'),
-                )
+                xaxis_rangeslider_visible=True)
 
 
     # append all charts to the figures list
