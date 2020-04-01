@@ -262,7 +262,7 @@ def return_figures():
 
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Infected_percent.tolist()
+      y_val =  df[df['Country'] == country].Infected_percent.astype('str').tolist()
       graph_one.append(
           go.Scatter(
           x = x_val,
