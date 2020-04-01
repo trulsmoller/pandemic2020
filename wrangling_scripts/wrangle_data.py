@@ -58,6 +58,8 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
         df['Deaths_per_100k'] = 100000*df['Deaths']/(df['Population'] + 1.0)
         df['Infected_per_100k'] = 100000*df['Infected']/(df['Population'] + 1.0)
 
+
+
     # filter/select data based on continent, selected_countries and historical
 
         if continent:
@@ -160,6 +162,39 @@ def prepare_bar(var, continent = None, top_n = None):
     df = df.sort_values(by=[var], ascending=True)
     return df
 
+def prepare_time(var, continent=None, top_n = None):
+
+
+    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
+                    historical = True,
+                    continent = continent)
+
+    # initializing the plot of df
+    dic = dict()
+
+    y = var
+    group = 'Country'
+
+    tot_countries = df.shape[0]
+
+    if top_n:
+        if top_n > tot_countries:
+            top_n = tot_countries
+    else:
+        top_n = tot_countries
+
+
+    last_date = df.index.max()
+
+    df_last = df[df.index == last_date].sort_values(var, ascending=False)
+    countrylist = list(df_last[group][:top_n])
+
+    df = df.reset_index()
+
+
+
+    return countrylist, df
+
 
 def return_figures():
     """Creates four plotly visualizations
@@ -220,10 +255,34 @@ def return_figures():
                 yaxis = dict(title = ''),
                 )
 
+    graph_three = []
+    countrylist, df = prepare_time('Infected_percent', '', top_n = 15)
+
+    df = df[df.Country.isin(country_list)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Infected_percent.tolist()
+      graph_one.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_three = dict(title = 'Percent of Population Infected',
+                xaxis = dict(title = 'Date',
+                  autotick=True),
+                yaxis = dict(title = 'Infected'),
+                )
+
 
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
+    figures.append(dict(data=graph_three, layout=layout_three))
 
     return figures
