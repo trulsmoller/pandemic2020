@@ -274,14 +274,35 @@ def return_figures():
 
     layout_three = dict(title = 'Percent of Population Infected',
                 xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Infected'),
+                yaxis = dict(title = 'Infected in percent'),
                 xaxis_rangeslider_visible=True)
 
+    graph_four = []
+    countrylist, df = prepare_time('Recovered_percent', continent = '', top_n = 15)
 
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Recovered_percent.tolist()
+      graph_three.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_three = dict(title = 'Percent of Population Recovered',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Recovered in percent'),
+                xaxis_rangeslider_visible=True)
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
+    figures.append(dict(data=graph_four, layout=layout_four))
 
     return figures
