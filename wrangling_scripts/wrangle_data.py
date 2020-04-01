@@ -239,6 +239,9 @@ def return_figures():
             )
         )
 
+
+    
+
     graph_two = []
     df = prepare_bar('Deaths_per_100k', continent = '', top_n = 15)
 
@@ -299,11 +302,35 @@ def return_figures():
                 yaxis = dict(title = 'Recovered in percent'),
                 xaxis_rangeslider_visible=True)
 
+
+    graph_five = []
+    countrylist, df = prepare_time('Deaths_per_100k', continent = '', top_n = 15)
+
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Deaths_per_100k.tolist()
+      graph_five.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_five = dict(title = 'Deaths per 100,000',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
+
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
+    figures.append(dict(data=graph_five, layout=layout_five))
 
     return figures
