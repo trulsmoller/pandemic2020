@@ -256,7 +256,7 @@ def return_figures():
                 )
 
     graph_three = []
-    countrylist, df = prepare_time('Infected_percent', '', top_n = 15)
+    countrylist, df = prepare_time('Infected_percent', continent = '', top_n = 15)
 
     df = df[df.Country.isin(country_list)]
 
@@ -282,6 +282,6 @@ def return_figures():
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
-    figures.append(dict(data=graph_three, layout=layout_three))
+    #figures.append(dict(data=graph_three, layout=layout_three))
 
     return figures
