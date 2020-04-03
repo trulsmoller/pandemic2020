@@ -220,7 +220,7 @@ def return_figures():
             locations = df['Short'],
             z = df['Infected_percent'],
             text = df['Country'],
-            colorscale = 'Wistia',
+            colorscale = 'Viridis_r',
             #Viridis_r
             autocolorscale=False,
             reversescale=True,
