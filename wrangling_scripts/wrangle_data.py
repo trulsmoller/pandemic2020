@@ -254,7 +254,7 @@ def return_figures():
       )
     )
 
-    layout_two = dict(title = 'European Countries with High Ratio of Deaths',
+    layout_two = dict(title = 'European Countries with High Ratio of Deaths Based on Population',
                 xaxis = dict(title = 'Deaths per 100k'),
                 yaxis = dict(title = ''),
                 )
