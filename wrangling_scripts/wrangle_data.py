@@ -1,4 +1,5 @@
 import pandas as pd
+import geopandas as gpd
 import plotly.graph_objs as go
 
 
@@ -57,6 +58,8 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
         df['Deaths_per_100k'] = 100000*df['Deaths']/(df['Population'] + 1.0)
         df['Infected_per_100k'] = 100000*df['Infected']/(df['Population'] + 1.0)
 
+
+
     # filter/select data based on continent, selected_countries and historical
 
         if continent:
@@ -95,7 +98,7 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
 def prepare_geo():
 
-    fp = 'web_app/data/ne_10m_admin_0_countries.shp'
+    fp = 'data/ne_10m_admin_0_countries.shp'
 
     gdf = gpd.read_file(fp)
 
@@ -104,13 +107,93 @@ def prepare_geo():
     gdf = gdf[['Country', 'Short', 'geometry']]
 
 
-    df_all = df_prepare('web_app/data/covid_19_data.csv', 'web_app/data/population_2020_for_johnhopkins_data.csv',
+    df_all = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
                     historical = False,
                     continent = None)
 
     df = gdf.merge(df_all, how='left', on='Short').drop(columns=['Date'])
 
     return df
+
+
+def prepare_bar(var, continent = None, top_n = None):
+
+    var_list_abs = ['Infected', 'Recovered', 'Deaths']
+    var_list_rel1 = ['Infected_percent', 'Recovered_percent', 'Deaths_percent']
+    var_list_rel2 = ['Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']
+
+    continent_list = ['America', 'Europe', 'Asia', 'Africa', 'Oceania']
+
+    if continent:
+        assert continent in continent_list
+
+
+    keyword1 = '_percent'
+    keyword2 = '_per_100k'
+
+    if keyword1 in var:
+
+        stat = '(relative to population)'
+        var_list = var_list_rel1
+
+    elif keyword2 in var:
+
+        stat = '(relative to population)'
+        var_list = var_list_rel2
+
+    else:
+        stat = ''
+        var_list = var_list_abs
+
+
+    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
+                    historical = False,
+                    continent = continent)
+
+    if top_n:
+        tot_countries = df.shape[0]
+        if top_n > tot_countries:
+            top_n = tot_countries
+
+    if not continent:
+        continent = "The World"
+
+    df = df.sort_values(by=[var], ascending=False).loc[:, var_list][:top_n].reset_index()
+    df = df.sort_values(by=[var], ascending=True)
+    return df
+
+def prepare_time(var, continent=None, top_n = None):
+
+
+    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
+                    historical = True,
+                    continent = continent)
+
+    # initializing the plot of df
+    dic = dict()
+
+    y = var
+    group = 'Country'
+
+    tot_countries = df.shape[0]
+
+    if top_n:
+        if top_n > tot_countries:
+            top_n = tot_countries
+    else:
+        top_n = tot_countries
+
+
+    last_date = df.index.max()
+
+    df_last = df[df.index == last_date].sort_values(var, ascending=False)
+    countrylist = list(df_last[group][:top_n])
+
+    df = df.reset_index()
+
+
+
+    return countrylist, df
 
 
 def return_figures():
@@ -129,25 +212,27 @@ def return_figures():
 
     graph_one = []
     df = prepare_geo()
-    df = df[['Country', 'Short', 'Infected_per_100k']]
-    df.sort_values('Infected_per_100k', ascending=False, inplace=True)
+    df = df[['Country', 'Short', 'Infected_percent']]
+    df.sort_values('Infected_percent', ascending=False, inplace=True)
 
     graph_one.append(
         go.Choropleth(
             locations = df['Short'],
-            z = df['Infected_per_100k'],
+            z = df['Infected_percent'],
             text = df['Country'],
-            colorscale = 'Blues',
+            colorscale = 'Viridis_r',
+            #Viridis_r
             autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Infected<br>per 100,000',
+            colorbar_title = 'Infected',
+            colorbar_ticksuffix = '%',
             )
         )
 
     layout_one = dict(
-        title = 'Global Infected per 100,000 people',
+        title = 'All Countries: Percent of Population Currently Infected',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -157,8 +242,96 @@ def return_figures():
 
 
 
+
+    graph_two = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 15)
+
+    graph_two.append(
+      go.Bar(
+      x = df.Deaths_per_100k.tolist(),
+      y = df.Country.tolist(),
+      orientation = 'h',
+      )
+    )
+
+    layout_two = dict(title = 'European Countries with High Ratio of Deaths Based on Population',
+                xaxis = dict(title = 'Deaths per 100k'),
+                yaxis = dict(title = ''),
+                )
+
+    graph_three = []
+    countrylist, df = prepare_time('Infected_percent', continent = '', top_n = 15)
+
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Infected_percent.tolist()
+      graph_three.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_three = dict(title = 'Percent of Population Infected',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Infected in percent'),
+                xaxis_rangeslider_visible=True)
+
+    graph_four = []
+    countrylist, df = prepare_time('Recovered_percent', continent = '', top_n = 15)
+
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Recovered_percent.tolist()
+      graph_four.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_four = dict(title = 'Percent of Population Recovered',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Recovered in percent'),
+                xaxis_rangeslider_visible=True)
+
+
+    graph_five = []
+    countrylist, df = prepare_time('Deaths_per_100k', continent = '', top_n = 15)
+
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Deaths_per_100k.tolist()
+      graph_five.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_five = dict(title = 'Deaths per 100,000',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
+
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append(dict(data=graph_two, layout=layout_two))
+    figures.append(dict(data=graph_three, layout=layout_three))
+    figures.append(dict(data=graph_four, layout=layout_four))
+    figures.append(dict(data=graph_five, layout=layout_five))
 
     return figures
