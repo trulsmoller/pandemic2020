@@ -357,7 +357,7 @@ def return_figures():
 
 
     graph_six = []
-    countrylist, df = prepare_time('Mortality_rate', continent = '', top_n = 15)
+    countrylist, df = prepare_time('Mortality_rate', continent = 'Europe', top_n = 15)
 
     df = df[df.Country.isin(countrylist)]
 
@@ -373,7 +373,7 @@ def return_figures():
           )
       )
 
-    layout_six = dict(title = 'Mortality Rate in Percent Total Outcomes (w/time lag)',
+    layout_six = dict(title = 'Mortality Rates Europe in Percent Total Outcomes (w/time lag)',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Percent'),
                 xaxis_rangeslider_visible=True)
