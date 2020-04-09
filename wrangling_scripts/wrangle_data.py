@@ -169,6 +169,35 @@ def prepare_time(var, continent=None, top_n = None):
                     historical = True,
                     continent = continent)
 
+    # steps to add new metrics such as death rate
+
+    countries = df.Country.unique()
+
+    for i, country in enumerate(countries):
+
+        days_delay = 18
+
+        if i == 0:
+
+
+            df1 = df.loc[df['Country'] == country]
+            df1['Deaths_n_daysago'] = df1['Deaths'].shift(days_delay)
+            df1['Mortality_rate'] = df1['Deaths_n_daysago'] / (df1['Recovered'] + df1['Deaths_n_daysago'])
+            df1['Recovered_in_n_days'] = df1['Deaths']*(1/(df1['Mortality_rate'] + 0.0000001) - 1)
+
+        elif i > 0:
+
+            df_single = df.loc[df['Country'] == country]
+            df_single['Deaths_n_daysago'] = df_single['Deaths'].shift(days_delay)
+            df_single['Mortality_rate'] = df_single['Deaths_n_daysago'] / (df_single['Recovered'] + df_single['Deaths_n_daysago'])
+            df_single['Recovered_in_n_days'] = df_single['Deaths']*(1/(df_single['Mortality_rate'] + 0.0000001) - 1)
+
+            frames = [df1, df_single]
+            df1 = pd.concat(frames)
+
+    df = df1
+
+
     # initializing the plot of df
     dic = dict()
 
@@ -305,7 +334,7 @@ def return_figures():
 
 
     graph_five = []
-    countrylist, df = prepare_time('Deaths_per_100k', continent = '', top_n = 15)
+    countrylist, df = prepare_time('Mortality_rate', continent = '', top_n = 15)
 
     df = df[df.Country.isin(countrylist)]
 
