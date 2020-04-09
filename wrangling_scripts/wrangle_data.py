@@ -189,8 +189,8 @@ def prepare_time(var, continent=None, top_n = None):
 
             df_single = df.loc[df['Country'] == country]
             df_single['Deaths_n_daysago'] = df_single['Deaths'].shift(days_delay)
-            df_single['Mortality_rate'] = df_single['Deaths_n_daysago'] / (df_single['Recovered'] + df_single['Deaths_n_daysago'])
-            df_single['Recovered_in_n_days'] = df_single['Deaths']*(1/(df_single['Mortality_rate'] + 0.0000001) - 1)
+            df_single['Mortality_rate'] = 100*df_single['Deaths_n_daysago'] / (df_single['Recovered'] + df_single['Deaths_n_daysago'])
+            df_single['Recovered_in_n_days'] = df_single['Deaths']*(1/(df_single['Mortality_rate']/100 + 0.0000001) - 1)
 
             frames = [df1, df_single]
             df1 = pd.concat(frames)
@@ -355,12 +355,36 @@ def return_figures():
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
 
+
+    graph_six = []
+    countrylist, df = prepare_time('Mortality_rate', continent = '', top_n = 15)
+
+    df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Mortality_rate.tolist()
+      graph_six.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_six = dict(title = 'Mortality Rate in Percent Total Outcomes (w/time lag)',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Percent'),
+                xaxis_rangeslider_visible=True)
+
     # append all charts to the figures list
     figures = []
-    figures.append(dict(data=graph_one, layout=layout_one))
+    #figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
     figures.append(dict(data=graph_five, layout=layout_five))
+    figures.append(dict(data=graph_six, layout=layout_six))
 
     return figures
