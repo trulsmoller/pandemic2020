@@ -175,15 +175,15 @@ def prepare_time(var, continent=None, top_n = None):
 
     for i, country in enumerate(countries):
 
-        days_delay = 18
+        days_delay = 21
 
         if i == 0:
 
 
             df1 = df.loc[df['Country'] == country]
             df1['Deaths_n_daysago'] = df1['Deaths'].shift(days_delay)
-            df1['Mortality_rate'] = df1['Deaths_n_daysago'] / (df1['Recovered'] + df1['Deaths_n_daysago'])
-            df1['Recovered_in_n_days'] = df1['Deaths']*(1/(df1['Mortality_rate'] + 0.0000001) - 1)
+            df1['Mortality_rate'] = 100*df1['Deaths_n_daysago'] / (df1['Recovered'] + df1['Deaths_n_daysago'])
+            df1['Recovered_in_n_days'] = df1['Deaths']*(1/(df1['Mortality_rate']/100 + 0.0000001) - 1)
 
         elif i > 0:
 
