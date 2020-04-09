@@ -261,7 +261,7 @@ def return_figures():
         )
 
     layout_one = dict(
-        title = 'All Countries: Percent of Population Currently Infected',
+        title = 'All Countries: Percent of Population Currently Infected (registrered)',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -305,7 +305,7 @@ def return_figures():
           )
       )
 
-    layout_three = dict(title = 'Percent of Population Infected',
+    layout_three = dict(title = 'Percent of Population Infected (registrered)',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Infected in percent'),
                 xaxis_rangeslider_visible=True)
@@ -327,7 +327,7 @@ def return_figures():
           )
       )
 
-    layout_four = dict(title = 'Percent of Population Recovered',
+    layout_four = dict(title = 'Percent of Population Recovered (registrered)',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Recovered in percent'),
                 xaxis_rangeslider_visible=True)
@@ -373,7 +373,7 @@ def return_figures():
           )
       )
 
-    layout_six = dict(title = 'Mortality Rates Europe in Percent Total Outcomes (w/time lag)',
+    layout_six = dict(title = 'Mortality Rates Europe in Percent Total Outcomes (work-in-progress)',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Percent'),
                 xaxis_rangeslider_visible=True)
