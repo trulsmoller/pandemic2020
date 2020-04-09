@@ -334,7 +334,7 @@ def return_figures():
 
 
     graph_five = []
-    countrylist, df = prepare_time('Mortality_rate', continent = '', top_n = 15)
+    countrylist, df = prepare_time('Deaths_per_100k', continent = '', top_n = 15)
 
     df = df[df.Country.isin(countrylist)]
 
