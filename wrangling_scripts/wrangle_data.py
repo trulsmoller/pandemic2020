@@ -239,12 +239,12 @@ def return_figures():
   # first chart plots arable land from 1990 to 2015 in top 10 economies
   # as a line chart
 
-    graph_one = []
+    graph_zero = []
     df = prepare_geo()
     df = df[['Country', 'Short', 'Infected_percent']]
     df.sort_values('Infected_percent', ascending=False, inplace=True)
 
-    graph_one.append(
+    graph_zero.append(
         go.Choropleth(
             locations = df['Short'],
             z = df['Infected_percent'],
@@ -260,7 +260,68 @@ def return_figures():
             )
         )
 
+    layout_zero = dict(
+        title = 'All Countries: Percent of Population Currently Infected (registrered)',
+        geo=dict(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='equirectangular'
+            )
+        )
+
+    graph_one = []
+    df = prepare_geo()
+    df = df[['Country', 'Short', 'Recovered_percent']]
+    df.sort_values('Recovered_percent', ascending=False, inplace=True)
+
+    graph_one.append(
+        go.Choropleth(
+            locations = df['Short'],
+            z = df['Recovered_percent'],
+            text = df['Country'],
+            colorscale = 'Viridis_r',
+            #Viridis_r
+            autocolorscale=False,
+            reversescale=True,
+            marker_line_color='darkgray',
+            marker_line_width=0.5,
+            colorbar_title = 'Recovered',
+            colorbar_ticksuffix = '%',
+            )
+        )
+
     layout_one = dict(
+        title = 'All Countries: Percent of Population Currently Recovered (registrered)',
+        geo=dict(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='equirectangular'
+            )
+        )
+
+
+    graph_two = []
+    df = prepare_geo()
+    df = df[['Country', 'Short', 'Deaths_per_100k']]
+    df.sort_values('Deaths_per_100k', ascending=False, inplace=True)
+
+    graph_two.append(
+        go.Choropleth(
+            locations = df['Short'],
+            z = df['Deaths_per_100k'],
+            text = df['Country'],
+            colorscale = 'Viridis_r',
+            #Viridis_r
+            autocolorscale=False,
+            reversescale=True,
+            marker_line_color='darkgray',
+            marker_line_width=0.5,
+            colorbar_title = 'Deaths',
+            colorbar_ticksuffix = '%',
+            )
+        )
+
+    layout_two = dict(
         title = 'All Countries: Percent of Population Currently Infected (registrered)',
         geo=dict(
             showframe=False,
@@ -272,21 +333,6 @@ def return_figures():
 
 
 
-    graph_two = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 15)
-
-    graph_two.append(
-      go.Bar(
-      x = df.Deaths_per_100k.tolist(),
-      y = df.Country.tolist(),
-      orientation = 'h',
-      )
-    )
-
-    layout_two = dict(title = 'European Countries with High Ratio of Deaths Based on Population',
-                xaxis = dict(title = 'Deaths per 100k'),
-                yaxis = dict(title = ''),
-                )
 
     graph_three = []
     countrylist, df = prepare_time('Infected_percent', continent = '', top_n = 15)
@@ -305,7 +351,7 @@ def return_figures():
           )
       )
 
-    layout_three = dict(title = 'Percent of Population Infected (registrered)',
+    layout_three = dict(title = 'Percent of Population Infected',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Infected in percent'),
                 xaxis_rangeslider_visible=True)
@@ -327,7 +373,7 @@ def return_figures():
           )
       )
 
-    layout_four = dict(title = 'Percent of Population Recovered (registrered)',
+    layout_four = dict(title = 'Percent of Population Recovered',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Recovered in percent'),
                 xaxis_rangeslider_visible=True)
@@ -378,13 +424,33 @@ def return_figures():
                 yaxis = dict(title = 'Percent'),
                 xaxis_rangeslider_visible=True)
 
+
+    graph_seven = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 15)
+
+    graph_seven.append(
+      go.Bar(
+      x = df.Deaths_per_100k.tolist(),
+      y = df.Country.tolist(),
+      orientation = 'h',
+      )
+    )
+
+    layout_seven = dict(title = 'European Countries with High Ratio of Deaths Based on Population',
+                xaxis = dict(title = 'Deaths per 100k'),
+                yaxis = dict(title = ''),
+                )
+
+
     # append all charts to the figures list
     figures = []
+    figures.append(dict(data=graph_zero, layout=layout_zero))
     figures.append(dict(data=graph_one, layout=layout_one))
-    #figures.append(dict(data=graph_two, layout=layout_two))
+    figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
     figures.append(dict(data=graph_five, layout=layout_five))
     figures.append(dict(data=graph_six, layout=layout_six))
+    figures.append(dict(data=graph_seven, layout=layout_seven))
 
     return figures
