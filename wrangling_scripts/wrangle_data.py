@@ -426,19 +426,19 @@ def return_figures():
 
 
     graph_seven = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = None)
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = '25')
 
     graph_seven.append(
       go.Bar(
-      x = df.Deaths_per_100k.tolist(),
-      y = df.Country.tolist(),
-      orientation = 'h',
+      y = df.Deaths_per_100k.tolist(),
+      x = df.Country.tolist(),
+      #orientation = 'h',
       )
     )
 
     layout_seven = dict(title = 'Europe Ranked by Deaths per 100,000 People',
-                xaxis = dict(title = 'Deaths per 100k'),
-                yaxis = dict(title = ''),
+                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = ''),
                 )
 
 
