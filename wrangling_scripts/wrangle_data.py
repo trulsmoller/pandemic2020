@@ -322,7 +322,7 @@ def return_figures():
         )
 
     layout_two = dict(
-        title = 'All Countries: Deaths per 100,000 people',
+        title = 'All Countries: Deaths per 100,000 People',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -426,7 +426,7 @@ def return_figures():
 
 
     graph_seven = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 15)
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = None)
 
     graph_seven.append(
       go.Bar(
@@ -436,7 +436,7 @@ def return_figures():
       )
     )
 
-    layout_seven = dict(title = 'European Countries with High Ratio of Deaths Based on Population',
+    layout_seven = dict(title = 'Europe Ranked by Deaths per 100,000 People',
                 xaxis = dict(title = 'Deaths per 100k'),
                 yaxis = dict(title = ''),
                 )
