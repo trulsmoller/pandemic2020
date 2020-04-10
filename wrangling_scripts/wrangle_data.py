@@ -316,13 +316,13 @@ def return_figures():
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Deaths',
-            colorbar_ticksuffix = '%',
+            colorbar_title = 'Deaths/ 100k',
+            colorbar_ticksuffix = '',
             )
         )
 
     layout_two = dict(
-        title = 'All Countries: Percent of Population Currently Infected (registrered)',
+        title = 'All Countries: Deaths per 100,000 people',
         geo=dict(
             showframe=False,
             showcoastlines=False,
