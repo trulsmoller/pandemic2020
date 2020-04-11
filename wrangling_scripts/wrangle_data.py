@@ -427,8 +427,8 @@ def return_figures():
 
     graph_seven = []
     df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 25)
-    df = df.sort_values('Deaths_per_100k', ascending=True)
-    
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+
     graph_seven.append(
       go.Bar(
       y = df.Deaths_per_100k.tolist(),
