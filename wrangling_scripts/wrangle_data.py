@@ -175,7 +175,7 @@ def prepare_time(var, continent=None, top_n = None):
 
     for i, country in enumerate(countries):
 
-        days_delay = 10
+        days_delay = 6
 
         if i == 0:
 
