@@ -73,7 +73,7 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
     if historical:
 
         df = df.query("index >= '2020-03-18'")
-        df = df[['Continent', 'Country', 'Population', 'Infected', 'Recovered', 'Deaths',
+        df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
                  'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                  'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
 
@@ -81,13 +81,13 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
         df = df[df.index == df.index.max()]
         if pop_dataset:
-            df = df[['Continent', 'Country', 'Short', 'Population', 'Infected', 'Recovered', 'Deaths',
+            df = df[['Continent', 'Country', 'Short', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
                      'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                      'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
 
             df = df.reset_index().set_index('Country')
         else:
-            df = df[['Continent', 'Country', 'Population', 'Infected', 'Recovered', 'Deaths',
+            df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
                      'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                      'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
 
