@@ -72,7 +72,7 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
     if historical:
 
-        df = df.query("index >= '2020-03-08'")
+        df = df.query("index >= '2020-03-18'")
         df = df[['Continent', 'Country', 'Population', 'Infected', 'Recovered', 'Deaths',
                  'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                  'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
@@ -182,14 +182,14 @@ def prepare_time(var, continent=None, top_n = None):
 
             df1 = df.loc[df['Country'] == country]
             df1['Conf_n_daysago'] = df1['Confirmed'].shift(days_delay)
-            df1['Mortality_rate'] = 100*df1['Deaths'] / df1['Conf_n_daysago']
+            df1['Mortality_rate'] = 100*df1['Deaths'] / (df1['Conf_n_daysago'] + 0.0000001)
             #df1['Recovered_in_n_days'] = df1['Deaths']*(1/(df1['Mortality_rate']/100 + 0.0000001) - 1)
 
         elif i > 0:
 
-            df1 = df.loc[df['Country'] == country]
-            df1['Conf_n_daysago'] = df1['Confirmed'].shift(days_delay)
-            df1['Mortality_rate'] = 100*df1['Deaths'] / df1['Conf_n_daysago']
+            df_single = df.loc[df['Country'] == country]
+            df_single['Conf_n_daysago'] = df_single['Confirmed'].shift(days_delay)
+            df_single['Mortality_rate'] = 100*df_single['Deaths'] / (df_single['Conf_n_daysago'] + 0.0000001)
             #df_single['Recovered_in_n_days'] = df_single['Deaths']*(1/(df_single['Mortality_rate']/100 + 0.0000001) - 1)
 
             frames = [df1, df_single]
