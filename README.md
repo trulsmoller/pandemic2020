@@ -8,7 +8,7 @@ Webapp hosted on Heroku. https://pandemic2020.herokuapp.com/
 
 This project will be work in progress for a while, as the pandemic unfolds. The underlying data gets updated daily.
 
-Python backend. Visualizations brought to the frontend webapp with plotly and bootstrap.
+Python backend. Visualizations brought to the frontend using plotly, js and bootstrap.
 
 ### Data
 Source of data sets:
