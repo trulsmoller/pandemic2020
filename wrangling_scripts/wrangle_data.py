@@ -72,7 +72,7 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
     if historical:
 
-        df = df.query("index >= '2020-03-18'")
+        df = df.query("index >= '2020-03-25'")
         df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
                  'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                  'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
@@ -419,7 +419,7 @@ def return_figures():
           )
       )
 
-    layout_six = dict(title = 'Mortality Rates Europe in Percent Total Outcomes (work-in-progress)',
+    layout_six = dict(title = 'Mortality Rates Europe (work-in-progress)',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Percent'),
                 xaxis_rangeslider_visible=True)
