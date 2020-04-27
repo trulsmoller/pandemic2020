@@ -72,7 +72,7 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
     if historical:
 
-        df = df.query("index >= '2020-03-25'")
+        df = df.query("index >= '2020-04-05'")
         df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
                  'Infected_percent', 'Recovered_percent', 'Deaths_percent',
                  'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
