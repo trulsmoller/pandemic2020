@@ -426,7 +426,7 @@ def return_figures():
 
 
     graph_seven = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 25)
+    df = prepare_bar('Deaths_per_100k', continent = 'America', top_n = 10)
     df = df.sort_values('Deaths_per_100k', ascending=False)
 
     graph_seven.append(
@@ -437,11 +437,79 @@ def return_figures():
       )
     )
 
-    layout_seven = dict(title = 'Europe Ranked by Deaths per 100,000 People',
+    layout_seven = dict(title = 'America Ranked by Deaths per 100,000 People',
                 yaxis = dict(title = 'Deaths per 100k'),
                 xaxis = dict(title = ''),
                 )
 
+    graph_eight = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 25)
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+
+    graph_eight.append(
+      go.Bar(
+      y = df.Deaths_per_100k.tolist(),
+      x = df.Country.tolist(),
+      #orientation = 'h',
+      )
+    )
+
+    layout_eight = dict(title = 'Europe Ranked by Deaths per 100,000 People',
+                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = ''),
+                )
+
+
+    graph_nine = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Asia', top_n = 20)
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+
+    graph_nine.append(
+      go.Bar(
+      y = df.Deaths_per_100k.tolist(),
+      x = df.Country.tolist(),
+      #orientation = 'h',
+      )
+    )
+
+    layout_nine = dict(title = 'Asia Ranked by Deaths per 100,000 People',
+                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = ''),
+                )
+
+    graph_ten = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Africa', top_n = 10)
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+
+    graph_ten.append(
+      go.Bar(
+      y = df.Deaths_per_100k.tolist(),
+      x = df.Country.tolist(),
+      #orientation = 'h',
+      )
+    )
+
+    layout_ten = dict(title = 'Africa Ranked by Deaths per 100,000 People',
+                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = ''),
+                )
+
+    graph_eleven = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Oceania', top_n = 3)
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+
+    graph_eleven.append(
+      go.Bar(
+      y = df.Deaths_per_100k.tolist(),
+      x = df.Country.tolist(),
+      #orientation = 'h',
+      )
+    )
+
+    layout_eleven = dict(title = 'Oceania Ranked by Deaths per 100,000 People',
+                yaxis = dict(title = 'Deaths per 100k'),
+                xaxis = dict(title = ''),
+                )
 
     # append all charts to the figures list
     figures = []
@@ -453,5 +521,10 @@ def return_figures():
     figures.append(dict(data=graph_five, layout=layout_five))
     figures.append(dict(data=graph_six, layout=layout_six))
     figures.append(dict(data=graph_seven, layout=layout_seven))
+    figures.append(dict(data=graph_eight, layout=layout_eight))
+    figures.append(dict(data=graph_nine, layout=layout_nine))
+    figures.append(dict(data=graph_ten, layout=layout_ten))
+    figures.append(dict(data=graph_eleven, layout=layout_eleven))
+
 
     return figures
