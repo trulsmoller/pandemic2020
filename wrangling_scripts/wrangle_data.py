@@ -543,6 +543,6 @@ def return_figures():
     figures.append(dict(data=graph_nine, layout=layout_nine))
     figures.append(dict(data=graph_ten, layout=layout_ten))
     figures.append(dict(data=graph_eleven, layout=layout_eleven))
-    figures.append(dict(data=table_one))
+    #figures.append(dict(data=table_one))
 
     return figures
