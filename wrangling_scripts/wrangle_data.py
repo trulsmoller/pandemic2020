@@ -226,7 +226,7 @@ def prepare_time(var, continent=None, top_n = None):
 
 
 def return_figures():
-    """Creates four plotly visualizations
+    """Creates plotly visualizations
 
     Args:
         None
@@ -511,19 +511,23 @@ def return_figures():
                 xaxis = dict(title = ''),
                 )
 
-    #table_one = []
-    #fig = go.Figure(data=[go.Table(
-    #header=dict(values=list(df.columns),
-    #            fill_color='paleturquoise',
-    #            align='left'),
-    #cells=dict(values=[df.Rank, df.State, df.Postal, df.Population],
-    #           fill_color='lavender',
-    #           align='left'))
-    #])
+    table_one = []
+    df = prepare_bar('Deaths_per_100k', continent = 'Africa', top_n = 10)
+    df = df.sort_values('Deaths_per_100k', ascending=False)
+    df = df[['Short', 'Deaths_per_100k']][:10]
+    fig = go.Figure(data=[go.Table(
+    header=dict(values=list(df.columns),
+                fill_color='paleturquoise',
+                align='left'),
+    cells=dict(values=[df.Short, df.Deaths_per_100k],
+               fill_color='lavender',
+               align='left'))
 
-    #table_one.append(
-    #    fig
-    #)
+    ])
+
+    table_one.append(
+        fig
+    )
 
     # append all charts to the figures list
     figures = []
@@ -539,6 +543,6 @@ def return_figures():
     figures.append(dict(data=graph_nine, layout=layout_nine))
     figures.append(dict(data=graph_ten, layout=layout_ten))
     figures.append(dict(data=graph_eleven, layout=layout_eleven))
-
+    figures.append(dict(data=table_one))
 
     return figures
