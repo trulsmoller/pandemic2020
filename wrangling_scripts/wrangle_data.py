@@ -511,6 +511,20 @@ def return_figures():
                 xaxis = dict(title = ''),
                 )
 
+    #table_one = []
+    #fig = go.Figure(data=[go.Table(
+    #header=dict(values=list(df.columns),
+    #            fill_color='paleturquoise',
+    #            align='left'),
+    #cells=dict(values=[df.Rank, df.State, df.Postal, df.Population],
+    #           fill_color='lavender',
+    #           align='left'))
+    #])
+
+    #table_one.append(
+    #    fig
+    #)
+
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_zero, layout=layout_zero))
