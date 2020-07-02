@@ -511,8 +511,23 @@ def return_figures():
                 xaxis = dict(title = ''),
                 )
 
+#    table_one = []
+#    df = prepare_bar('Deaths_per_100k', continent = 'Africa', top_n = 10)
+#    df = df.sort_values('Deaths_per_100k', ascending=False)
+#    df = df[['Short', 'Deaths_per_100k']]
+#    fig = go.Figure(data=[go.Table(
+#    header=dict(values=list(df.columns),
+#                fill_color='paleturquoise',
+#                align='left'),
+#    cells=dict(values=[df.Short, df.Deaths_per_100k],
+#               fill_color='lavender',
+#               align='left'))
+#
+#    ])
 
-
+    #table_one.append(
+#        fig
+#    )
 
     # append all charts to the figures list
     figures = []
