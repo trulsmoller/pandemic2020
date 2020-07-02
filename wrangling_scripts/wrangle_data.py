@@ -525,9 +525,9 @@ def return_figures():
 
     ])
 
-    table_one.append(
-        fig
-    )
+    #table_one.append(
+#        fig
+#    )
 
     # append all charts to the figures list
     figures = []
