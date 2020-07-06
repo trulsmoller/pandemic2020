@@ -27,7 +27,7 @@ Chad;TCD;Africa;16425864;13;17;23 %
 Chile;CHL;America;19116201;26;35;85 %
 China;CHN;Asia;1439323776;153;38;61 %
 Colombia;COL;America;50882891;46;31;80 %
-Congo;COG;Africa;5518087;16;19;70 %
+Congo (Brazzaville);COG;Africa;5518087;16;19;70 %
 Congo (Kinshasa);COD;Africa;89561403;40;17;46 %
 Costa Rica;CRI;America;5094118;100;33;80 %
 Cote d'Ivoire;CDI;Africa;26378274;83;19;51 %
@@ -47,6 +47,7 @@ Finland;FIN;Europe;5540720;18;43;86 %
 France;FRA;Europe;65273511;119;42;82 %
 Georgia;GEO;Europe;3989167;57;38;58 %
 Germany;DEU;Europe;83783942;240;46;76 %
+Gabon;GAB;Africa;2119275;8;22;50 %
 Ghana;GHA;Africa;31072940;137;22;57 %
 Greece;GRC;Europe;10423054;81;46;85 %
 Guatemala;GTM;America;17915568;167;23;52 %
@@ -120,7 +121,7 @@ Slovenia;SVN;Europe;2078938;103;45;55 %
 Somalia;SOM;Africa;15893222;25;17;47 %
 South Africa;ZAF;Africa;59308690;49;28;67 %
 South Korea;KOR;Asia;51269185;527;44;82 %
-South Sudan;OD;Africa;11193725;18;19;25 %
+South Sudan;SSD;Africa;11193725;18;19;25 %
 Spain;ESP;Europe;46754778;94;45;80 %
 Sri Lanka;LKA;Asia;21413249;341;34;18 %
 State of Palestine;PSE;Asia;5101414;847;21;80 %
