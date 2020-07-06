@@ -169,7 +169,6 @@ def prepare_time(var, continent=None, top_n = None):
                     historical = True,
                     continent = continent)
 
-    # steps to add new metrics such as death rate
 
     countries = df.Country.unique()
 
