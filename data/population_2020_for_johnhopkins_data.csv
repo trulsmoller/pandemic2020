@@ -45,11 +45,13 @@ Estonia;EST;Europe;1326535;31;42;68 %
 Ethiopia;ETH;Africa;114963588;115;19;21 %
 Finland;FIN;Europe;5540720;18;43;86 %
 France;FRA;Europe;65273511;119;42;82 %
+Gabon;GAB;Africa;2119275;8;22;50 %
+Gambia;GMB;Africa;2402083;239;18;59 %
 Georgia;GEO;Europe;3989167;57;38;58 %
 Germany;DEU;Europe;83783942;240;46;76 %
-Gabon;GAB;Africa;2119275;8;22;50 %
 Ghana;GHA;Africa;31072940;137;22;57 %
 Greece;GRC;Europe;10423054;81;46;85 %
+Greenland;GRL;Europe;56750;1;34;87 %
 Guatemala;GTM;America;17915568;167;23;52 %
 Guinea;GIN;Africa;13132795;53;18;39 %
 Haiti;HTI;America;11402528;414;24;57 %
@@ -64,6 +66,7 @@ Iraq;IRQ;Asia;40222493;93;21;73 %
 Ireland;IRL;Europe;4937786;72;38;63 %
 Israel;ISR;Asia;8655535;400;30;93 %
 Italy;ITA;Europe;60461826;206;47;69 %
+Jamaica;JAM;America;2958567;273;31;55 %
 Japan;JPN;Asia;126476461;347;48;92 %
 Jordan;JOR;Asia;10203134;115;24;91 %
 Kazakhstan;KAZ;Asia;18776707;7;31;58 %
@@ -75,6 +78,7 @@ Latvia;LVA;Europe;1886198;30;44;69 %
 Lebanon;LBN;Asia;6825445;667;30;78 %
 Liberia;LBR;Africa;5057681;53;19;53 %
 Libya;LBY;Africa;6871292;4;29;78 %
+Liechtenstein;LIE;Europe;38106;238;43;15 %
 Lithuania;LTU;Europe;2722289;43;45;71 %
 Luxembourg;LUX;Europe;625978;242;40;88 %
 Madagascar;MDG;Africa;27691018;48;20;39 %
@@ -101,6 +105,7 @@ North Macedonia;MKD;Europe;2083374;83;39;59 %
 Norway;NOR;Europe;5421241;15;40;83 %
 Oman;OMN;Asia;5106626;16;31;87 %
 Pakistan;PAK;Asia;220892340;287;23;35 %
+Palestine;PSE;Asia;5101414;847;21;80 %
 Panama;PAN;America;4314767;58;30;68 %
 Papua New Guinea;PNG;Oceania;8947024;20;22;13 %
 Paraguay;PRY;America;7132538;18;26;62 %
@@ -108,6 +113,8 @@ Peru;PER;America;32971854;26;31;79 %
 Philippines;PHL;Asia;109581078;368;26;47 %
 Poland;POL;Europe;37846611;124;42;60 %
 Portugal;PRT;Europe;10196709;111;46;66 %
+Puerto Rico;PRI;America;2874636;323;44;84 %
+Qatar;QAT;Asia;2870922;248;32;96 %
 Romania;ROU;Europe;19237691;84;43;55 %
 Russia;RUS;Asia;145934462;9;40;74 %
 Rwanda;RWA;Africa;12952218;525;20;18 %
@@ -124,7 +131,6 @@ South Korea;KOR;Asia;51269185;527;44;82 %
 South Sudan;SSD;Africa;11193725;18;19;25 %
 Spain;ESP;Europe;46754778;94;45;80 %
 Sri Lanka;LKA;Asia;21413249;341;34;18 %
-State of Palestine;PSE;Asia;5101414;847;21;80 %
 Sudan;SDN;Africa;43849260;25;20;35 %
 Sweden;SWE;Europe;10099265;25;41;88 %
 Switzerland;CHE;Europe;8654622;219;43;74 %
