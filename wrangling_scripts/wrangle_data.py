@@ -332,9 +332,9 @@ def prepare_barplot(continent=None, top_n = (None, None)):
 
     df_merged = merge_data()
 
-    df_full = add_calculated_cols(df_merged)
+    #df_full = add_calculated_cols(df_merged)
 
-    df_current = dates_choice(df_full, all_dates=False)
+    df_current = dates_choice(df_merged, all_dates=False)
 
     if continent:
         df_current = select_continent(df_current, continent)
@@ -352,7 +352,8 @@ def prepare_barplot(continent=None, top_n = (None, None)):
 
         df_current = rank_data(df_current, top_n[0], top_n[1])
 
-    df_current = df_current.reset_index().set_index('Country')
+    df_current = df_current.reset_index()
+    #.set_index('Country')
 
     return df_current
 
