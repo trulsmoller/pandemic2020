@@ -373,26 +373,26 @@ def return_figures():
     graph_one = []
     df = prepare_barplot()
     df = df.reset_index()
-    df = df[['Country', 'ISO', 'Total_deaths_per_100k']]
+    df = df[['Country', 'ISO', 'Total_deaths']]
     df.sort_values('Deaths_per_100k', ascending=False, inplace=True)
 
     graph_one.append(
         go.Choropleth(
             locations = df['ISO'],
-            z = df['Total_deaths_per_100k'],
+            z = df['Total_deaths'],
             text = df['Country'],
             colorscale = 'Viridis_r',
             autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray',
             marker_line_width=0.5,
-            colorbar_title = 'Deaths/ 100k',
+            colorbar_title = 'Deaths',
             colorbar_ticksuffix = '',
             )
         )
 
     layout_one = dict(
-        title = 'All Countries: Total deaths per 100,000 People',
+        title = 'All Countries: Total deaths',
         geo=dict(
             showframe=False,
             showcoastlines=False,
