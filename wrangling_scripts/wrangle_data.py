@@ -4,7 +4,7 @@ import datetime as dt
 import plotly.graph_objs as go
 
 
-def get_popdata(popdata_path = POPDATA_PATH):
+def get_popdata(popdata_path):
     '''
     This function reads the population data from csv file into a pandas DataFrame, cleans up the
     column names and transforms 'Urban population ratio' data to type Float.
@@ -39,7 +39,7 @@ def get_popdata(popdata_path = POPDATA_PATH):
 
     return df_pop
 
-def get_covid_data(data_path = DATA_PATH):
+def get_covid_data(data_path):
     '''
     This function reads the covid-19 data from csv file into a pandas DataFrame, cleans up the
     column names and updates some of the country names to match the ones used in the population dataset.
