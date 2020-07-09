@@ -1,30 +1,62 @@
 import pandas as pd
-import geopandas as gpd
+import numpy as np
+import datetime as dt
 import plotly.graph_objs as go
 
 
-def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_n = None):
-    """Clean world bank data for a visualizaiton dashboard
+def get_popdata(popdata_path):
+    '''
+    This function reads the population data from csv file into a pandas DataFrame, cleans up the
+    column names and transforms 'Urban population ratio' data to type Float.
 
-    Keeps data range of dates in keep_columns variable and data for the top 10 economies
-    Reorients the columns into a year, country and value
-    Saves the results to a csv file
+    The data contains the following on country-level:
 
-    Args:
-        dataset (str): path of the csv data file
+    - Country name
+    - ISO code as described in the ISO 3166 international standard, the 3-letter version ('Short')
+    - Continent
+    - Population
+    - Population per square kilometer
+    - Median age
+    - Urban population ratio
+
+    Args
+        popdata_path (str): path to the population data file
 
     Returns:
-        clean data (dataframe)
+        df_pop (dataframe): population dataframe
+    '''
 
-    """
-    # read datasets
+    # population dataset read into dataframe
+    df_pop = pd.read_csv(popdata_path, delimiter=";")
 
-    df = pd.read_csv(dataset) #
+    # setting column headers
+    df_pop.columns = ['Country', 'ISO', 'Continent', 'Population', 'Pop_km2', 'Median_age', 'Urban_Population_percent']
 
-    if pop_dataset:
+    # extracting the ratio from string column 'UrbanPopPercent' and replacing it with a new column with
+    # float values for ratio.
+    df_pop['Urban_Population_ratio'] = df_pop['Urban_Population_percent'].str.strip('%').astype(float).div(100)
+    df_pop.drop('Urban_Population_percent', axis = 1, inplace=True)
 
-        df_pop = pd.read_csv(pop_dataset, delimiter=";") # population dataset
+    return df_pop
 
+def get_covid_data(data_path):
+    '''
+    This function reads the covid-19 data from csv file into a pandas DataFrame, cleans up the
+    column names and updates some of the country names to match the ones used in the population dataset.
+
+    The data contains the following on country-level:
+    - Country name
+    - Date (Daily. The start date is not the same for all countries; it ranges from January to March 2020)
+    - Deaths (total number for respective country at respective date)
+
+    Args:
+        data_path (str): path to covid-19 data file
+
+    Returns:
+        this function does not return anything
+    '''
+
+    df = pd.read_csv(data_path) # population dataset read into dataframe
 
     # clean data
 
@@ -32,196 +64,297 @@ def df_prepare(dataset, pop_dataset=None, historical=False, continent=None, top_
 
     df = df.groupby(['Country', 'Date']).sum().reset_index()
 
+    # update some of the country names to match the ones used in the population dataset
 
     df['Country'] = df['Country'].replace({'UK': 'United Kingdom',
                                            'US': 'United States',
                                            'Mainland China': 'China',
                                            'Czech Republic': 'Czechia',
+                                           'Burma': 'Myanmar'
                                            })
+    try:
+        df['Country'] = df['Country'].replace({"('St. Martin',)": "St. Martin",
+                                               "occupied Palestinian territory": "Palestine",
+                                               "State of Palestine": "Palestine",
+                                               "Ivory Coast": "Cote d'Ivoire",
+                                               "Gambia, The": "Gambia",
+                                               "The Gambia": "Gambia",
+                                               "The Bahamas": "Bahamas",
+                                               "Bahamas, The": "Bahamas",
+                                               "Republic of Ireland": "Ireland",
+                                               "Republic of the Congo": "Congo (Brazzaville)",
+                                               " Azerbaijan": "Azerbaijan"
+
+                                              })
+    except:
+        pass
+
+    # sort on Country, then Date. Mostly it is only one row getting grouped, whereever data is on regional
+    # groupby ensures we get the data summed up to country level
+    df_covid = df.groupby(['Country', 'Date']).sum().reset_index()
+
+    # dropping columns we will not use.
+    df_covid.drop(['SNo', 'Confirmed', 'Recovered'], axis=1, inplace=True)
+
+    df_covid.columns = ['Country', 'Date', 'Total_deaths']
+
+    return df_covid
+
+
+def merge_data():
+    '''
+    This function unzips the compressed new data file found in the 'data' folder
+    in the root directory of the web app. Then the zip file is deleted.
+
+    Args:
+        file_name (str): name of covid-19 data file
+        file_path (str): path to covid-19 data file
+
+    Returns:
+        this function does not return anything
+    '''
+
+    popdata_path = 'data/population_2020_for_johnhopkins_data.csv'
+    data_path = 'data/covid_19_data.csv'
+
+    df_pop = get_popdata(popdata_path)
+
+    df_covid = get_covid_data(data_path)
+
+    df_merged = df_covid.set_index('Country').join(df_pop.set_index('Country')).reset_index()
+
+    df_merged.dropna(subset=['Population'], inplace=True)
 
 
 
-    if pop_dataset:
+    df_merged = df_merged[['Date', 'Continent', 'Country', 'ISO', 'Population', 'Urban_Population_ratio', 'Pop_km2', 'Median_age', 'Total_deaths']]
 
-        df = df.set_index('Country').join(df_pop.set_index('Country'))
-        df.dropna(subset=['Population'], inplace=True)
+    df_merged.Date = pd.to_datetime(df_merged.Date, infer_datetime_format=True)
 
-        df['Infected'] = df['Confirmed'] - df['Recovered'] - df['Deaths']
+    return df_merged
 
-        df['Confirmed_percent'] = 100*df['Confirmed']/(df['Population'] + 1.0)
-        df['Recovered_percent'] = 100*df['Recovered']/(df['Population'] + 1.0)
-        df['Deaths_percent'] = 100*df['Deaths']/(df['Population'] + 1.0)
-        df['Infected_percent'] = 100*df['Infected']/(df['Population'] + 1.0)
+def add_calculated_cols(df_merged):
+    '''
+    This function adds some calculated columns to the dataframe
 
-        df['Confirmed_per_100k'] = 100000*df['Confirmed']/(df['Population'] + 1.0)
-        df['Recovered_per_100k'] = 100000*df['Recovered']/(df['Population'] + 1.0)
-        df['Deaths_per_100k'] = 100000*df['Deaths']/(df['Population'] + 1.0)
-        df['Infected_per_100k'] = 100000*df['Infected']/(df['Population'] + 1.0)
+    Args:
+        df_merged (dataframe): df containing covid-19 data as well as population data
+
+    Returns:
+        df_full (dataframe): With new columns added
+    '''
+
+    df_full = df_merged.copy()
+
+    df_full['Total_deaths_per_100k'] = 100000*df_full['Total_deaths']/(df_full['Population'] + 1.0)
+
+    df_full['Deaths'] = 0.0
+    df_full['Deaths_per_100k'] = 0.0
+    df_full['Deaths_s7'] = 0.0
+    df_full['Deaths_per_100k_s7'] = 0.0
+    df_full['Deaths_week'] = 0.0
+    df_full['Deaths_lastweek'] = 0.0
+    df_full['Infection_rate'] = 0.0
+
+    country_list = df_full.Country.unique().tolist()
+
+    for country in country_list:
+
+
+        df_temp = df_full.loc[df_full.Country == country]
+
+        df_temp['Shift1'] = df_temp.Total_deaths.shift(1).fillna(0)
+        df_temp['Deaths'] = df_temp['Total_deaths'] - df_temp['Shift1']
+
+        df_temp['Deaths_shift1'] = df_temp['Deaths'].shift(1).fillna(0)
+        df_temp['Deaths_shift2'] = df_temp['Deaths'].shift(2).fillna(0)
+        df_temp['Deaths_shift3'] = df_temp['Deaths'].shift(3).fillna(0)
+        df_temp['Deaths_shift4'] = df_temp['Deaths'].shift(4).fillna(0)
+        df_temp['Deaths_shift5'] = df_temp['Deaths'].shift(5).fillna(0)
+        df_temp['Deaths_shift6'] = df_temp['Deaths'].shift(6).fillna(0)
 
 
 
-    # filter/select data based on continent, selected_countries and historical
 
-        if continent:
-            df = df[df['Continent'] == continent]
+        df_temp['Deaths_week'] = (df_temp['Deaths'] + df_temp['Deaths_shift1'] \
+                                     + df_temp['Deaths_shift2'] + df_temp['Deaths_shift3'] \
+                                     + df_temp['Deaths_shift4'] + df_temp['Deaths_shift5'] \
+                                     + df_temp['Deaths_shift6']).astype(int)
 
-    #df = df.loc[df.index.isin(selected_countries), :]
+        df_temp['Deaths_lastweek'] = df_temp['Deaths_week'].shift(7).fillna(0)
 
-    df = df.reset_index().set_index('Date')
+        df_temp['Infection_rate'] = (df_temp['Deaths_week']/df_temp['Deaths_lastweek']).fillna(0).replace([np.inf, -np.inf], 0)
+
+        df_temp['Deaths_s7'] = (df_temp['Deaths_week']/7.0).astype(int)
+
+        df_temp.drop(['Shift1', 'Deaths_shift1', 'Deaths_shift2', 'Deaths_shift3', \
+                      'Deaths_shift4', 'Deaths_shift5', 'Deaths_shift6'], axis=1, inplace=True)
+
+
+        df_temp['Deaths_per_100k'] = 100000*df_temp['Deaths']/(df_temp['Population'] + 1.0)
+        df_temp['Deaths_per_100k_s7'] = 100000*df_temp['Deaths_s7']/(df_temp['Population'] + 1.0)
+
+        index_list = df_temp.index
+
+        for i in index_list:
+            df_full.loc[i,'Deaths'] = df_temp.loc[i,'Deaths']
+            df_full.loc[i,'Deaths_s7'] = df_temp.loc[i,'Deaths_s7']
+
+            df_full.loc[i,'Deaths_per_100k'] = df_temp.loc[i,'Deaths_per_100k']
+            df_full.loc[i,'Deaths_per_100k_s7'] = df_temp.loc[i,'Deaths_per_100k_s7']
+            df_full.loc[i,'Deaths_week'] = df_temp.loc[i,'Deaths_week']
+            df_full.loc[i,'Deaths_lastweek'] = df_temp.loc[i,'Deaths_lastweek']
+            df_full.loc[i,'Infection_rate'] = df_temp.loc[i,'Infection_rate']
+
+
+    return df_full
+
+def dates_choice(df, all_dates=False, specific_date=None):
+    '''
+    This function filters and transforms the dataset into one of two different dataset types
+    based on the True/False value provided as 'all_dates' argument:
+
+    1. Historic data (all_dates=True)
+    2. Single date data (all_dates=False)
+
+    The historic data will be suitable for performing time series analysis, and for this purpose
+    the columns 'New_deaths' and 'New_deaths_per_100k' are added. The latter is also smoothed
+    applying a 7-day moving average on the daily new deaths reported. This effectively removes
+    the weekly seasonality.
+
+    The single date data will be suitable to look at the overall picture (such as accumulated death
+    count per country). By default the date will be the last date. However, one can also input
+    a 'specific_date' to override the default.
+
+    Note: The specific_date input will be ignored if used in combination with historic seach
+    (all_dates=True).
+
+    Args:
+        df (dataframe): df containing covid-19 data as well as population data
+
+        all_dates (boolean): Optional argument - True if you wish to get all the historic data
+
+        specific_date (string): Optional argument - If all_dates is False, you may input a 'yyyy-mm-dd'
+        string in order to override the default behaviour which gets you the latest date.
+
+    Returns:
+        df_filtered (dataframe): Filtered dataframe with added attributes in case of the historic option.
+    '''
+
+    if not all_dates:
+
+        if specific_date:
+
+            df = df[df.Date == specific_date].reset_index(drop=True)
+        else:
+            df = df[df.Date == df.Date.max()].reset_index(drop=True)
+
+    df = df.reset_index(drop=True).set_index('Date')
     df.index = pd.to_datetime(df.index, infer_datetime_format=True)
 
-    if historical:
+    return df
 
-        df = df.query("index >= '2020-04-05'")
-        df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
-                 'Infected_percent', 'Recovered_percent', 'Deaths_percent',
-                 'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
+def select_continent(df, continent):
+    '''
+    This function filters the dataframe on a single continent
 
-    else:
+    Args:
+        df (dataframe): Dataset including a column 'Continent'
+        continent (string): Name of continent. Valid values are found in below list
 
-        df = df[df.index == df.index.max()]
-        if pop_dataset:
-            df = df[['Continent', 'Country', 'Short', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
-                     'Infected_percent', 'Recovered_percent', 'Deaths_percent',
-                     'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
+    Returns:
+        df_continent (dataframe): Dataframe with only data from a single contintent
+    '''
+    if continent:
 
-            df = df.reset_index().set_index('Country')
-        else:
-            df = df[['Continent', 'Country', 'Population', 'Confirmed', 'Infected', 'Recovered', 'Deaths',
-                     'Infected_percent', 'Recovered_percent', 'Deaths_percent',
-                     'Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']]
+        continent_list = ['America', 'Europe', 'Asia', 'Africa', 'Oceania']
 
-            df = df.reset_index().set_index('Country')
+        assert continent in continent_list, "Continent is not in continent_list"
 
+        df_continent = df[df['Continent'] == continent]
+
+    return df_continent
+
+
+def rank_data(df_current, var, top_n = None):
+    '''
+    This function filters on the top n countries ranked on any of the following:
+
+    - Population
+    - Pop_km2
+    - Urban_Population_ratio
+    - Median_age
+    - Deaths
+    - Deaths_per_100k
+
+    Args:
+        file_name (str): name of covid-19 data file
+        file_path (str): path to covid-19 data file
+
+    Returns:
+        this function does not return anything
+    '''
+
+    var_list = ['Population', 'Pop_km2', 'Urban_Population_ratio', 'Median_age', 'Total_deaths', \
+                'Total_deaths_per_100k', 'Deaths', 'Deaths_per_100k', 'Deaths_s7', 'Deaths_per_100k_s7',
+                'Deaths_week', 'Deaths_lastweek', 'Infection_rate']
+    assert var in var_list
+
+    if top_n:
+        tot_countries = df_current.shape[0]
+        if top_n > tot_countries:
+            top_n = tot_countries
+
+    df = df_current.sort_values(by=[var], ascending=False)[:top_n]
 
     return df
 
-def prepare_geo():
+def prepare_barplot(continent=None, top_n = (None, None)):
+    '''
+    This funtion gets the current high level aggregated data suitable for bar plots.
+    It is optional to filter on continent.
+    It is also optional to filter on the top n countries ranked on any of the following:
 
-    fp = 'data/ne_10m_admin_0_countries.shp'
+    - Population
+    - Pop_km2
+    - Urban_Population_ratio
+    - Median_age
+    - Deaths
+    - Deaths_per_100k
 
-    gdf = gpd.read_file(fp)
+    Args:
+        file_name (str): name of covid-19 data file
+        file_path (str): path to covid-19 data file
 
-    gdf = gdf.rename(columns={"ADMIN": "Country", "ADM0_A3": "Short"})
+    Returns:
+        this function does not return anything
+    '''
 
-    gdf = gdf[['Country', 'Short', 'geometry']]
+    df_merged = merge_data()
 
+    df_full = add_calculated_cols(df_merged)
 
-    df_all = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
-                    historical = False,
-                    continent = None)
-
-    df = gdf.merge(df_all, how='left', on='Short').drop(columns=['Date'])
-
-    return df
-
-
-def prepare_bar(var, continent = None, top_n = None):
-
-    var_list_abs = ['Infected', 'Recovered', 'Deaths']
-    var_list_rel1 = ['Infected_percent', 'Recovered_percent', 'Deaths_percent']
-    var_list_rel2 = ['Infected_per_100k', 'Recovered_per_100k', 'Deaths_per_100k']
-
-    continent_list = ['America', 'Europe', 'Asia', 'Africa', 'Oceania']
+    df_current = dates_choice(df_full, all_dates=False)
 
     if continent:
-        assert continent in continent_list
+        df_current = select_continent(df_current, continent)
 
+    var_list = ['Population', 'Pop_km2', 'Urban_Population_ratio', 'Median_age', 'Total_deaths', \
+                'Total_deaths_per_100k', 'Deaths', 'Deaths_per_100k', 'Deaths_s7', 'Deaths_per_100k_s7', \
+                'Deaths_week', 'Deaths_lastweek', 'Infection_rate']
 
-    keyword1 = '_percent'
-    keyword2 = '_per_100k'
+    # assert that top_n tuple input is valid in case two (no-None) elements are provided
 
-    if keyword1 in var:
+    if (len(top_n) == 2) and (top_n[0] and top_n[1]):
 
-        stat = '(relative to population)'
-        var_list = var_list_rel1
+        assert top_n[0] in var_list, "First tuple element in 'top_n' must be in var_list and of type String"
+        assert isinstance(top_n[1], int) == True, "Second tuple element in 'top_n' must of type Integer"
 
-    elif keyword2 in var:
+        df_current = rank_data(df_current, top_n[0], top_n[1])
 
-        stat = '(relative to population)'
-        var_list = var_list_rel2
+    df_current = df_current.reset_index().set_index('Country')
 
-    else:
-        stat = ''
-        var_list = var_list_abs
-
-
-    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
-                    historical = False,
-                    continent = continent)
-
-    if top_n:
-        tot_countries = df.shape[0]
-        if top_n > tot_countries:
-            top_n = tot_countries
-
-    if not continent:
-        continent = "The World"
-
-    df = df.sort_values(by=[var], ascending=False).loc[:, var_list][:top_n].reset_index()
-    df = df.sort_values(by=[var], ascending=True)
-    return df
-
-def prepare_time(var, continent=None, top_n = None):
-
-
-    df = df_prepare('data/covid_19_data.csv', 'data/population_2020_for_johnhopkins_data.csv',
-                    historical = True,
-                    continent = continent)
-
-
-    countries = df.Country.unique()
-
-    for i, country in enumerate(countries):
-
-        days_delay = 6
-
-        if i == 0:
-
-
-            df1 = df.loc[df['Country'] == country]
-            df1['Conf_n_daysago'] = df1['Confirmed'].shift(days_delay)
-            df1['Mortality_rate'] = 100*df1['Deaths'] / (df1['Conf_n_daysago'] + 0.00001)
-            #df1['Recovered_in_n_days'] = df1['Deaths']*(1/(df1['Mortality_rate']/100 + 0.0000001) - 1)
-
-        elif i > 0:
-
-            df_single = df.loc[df['Country'] == country]
-            df_single['Conf_n_daysago'] = df_single['Confirmed'].shift(days_delay)
-            df_single['Mortality_rate'] = 100*df_single['Deaths'] / (df_single['Conf_n_daysago'] + 0.00001)
-            #df_single['Recovered_in_n_days'] = df_single['Deaths']*(1/(df_single['Mortality_rate']/100 + 0.0000001) - 1)
-
-            frames = [df1, df_single]
-            df1 = pd.concat(frames)
-
-    df = df1
-
-
-    # initializing the plot of df
-    dic = dict()
-
-    y = var
-    group = 'Country'
-
-    tot_countries = df.shape[0]
-
-    if top_n:
-        if top_n > tot_countries:
-            top_n = tot_countries
-    else:
-        top_n = tot_countries
-
-
-    last_date = df.index.max()
-
-    df_last = df[df.index == last_date].sort_values(var, ascending=False)
-    countrylist = list(df_last[group][:top_n])
-
-    df = df.reset_index()
-
-
-
-    return countrylist, df
+    return df_current
 
 
 def return_figures():
@@ -231,86 +364,23 @@ def return_figures():
         None
 
     Returns:
-        list (dict): list containing the four plotly visualizations
+        list (dict): list containing plotly visualizations
 
     """
 
-  # first chart plots arable land from 1990 to 2015 in top 10 economies
-  # as a line chart
-
-    graph_zero = []
-    df = prepare_geo()
-    df = df[['Country', 'Short', 'Infected_percent']]
-    df.sort_values('Infected_percent', ascending=False, inplace=True)
-
-    graph_zero.append(
-        go.Choropleth(
-            locations = df['Short'],
-            z = df['Infected_percent'],
-            text = df['Country'],
-            colorscale = 'Viridis_r',
-            #Viridis_r
-            autocolorscale=False,
-            reversescale=True,
-            marker_line_color='darkgray',
-            marker_line_width=0.5,
-            colorbar_title = 'Infected',
-            colorbar_ticksuffix = '%',
-            )
-        )
-
-    layout_zero = dict(
-        title = 'All Countries: Percent of Population Currently Infected (registrered)',
-        geo=dict(
-            showframe=False,
-            showcoastlines=False,
-            projection_type='equirectangular'
-            )
-        )
 
     graph_one = []
-    df = prepare_geo()
-    df = df[['Country', 'Short', 'Recovered_percent']]
-    df.sort_values('Recovered_percent', ascending=False, inplace=True)
+    df = prepare_barplot()
+    df = df.reset_index()
+    df = df[['Country', 'ISO', 'Total_deaths_per_100k']]
+    df.sort_values('Deaths_per_100k', ascending=False, inplace=True)
 
     graph_one.append(
         go.Choropleth(
-            locations = df['Short'],
-            z = df['Recovered_percent'],
+            locations = df['ISO'],
+            z = df['Total_deaths_per_100k'],
             text = df['Country'],
             colorscale = 'Viridis_r',
-            #Viridis_r
-            autocolorscale=False,
-            reversescale=True,
-            marker_line_color='darkgray',
-            marker_line_width=0.5,
-            colorbar_title = 'Recovered',
-            colorbar_ticksuffix = '%',
-            )
-        )
-
-    layout_one = dict(
-        title = 'All Countries: Percent of Population Currently Recovered (registrered)',
-        geo=dict(
-            showframe=False,
-            showcoastlines=False,
-            projection_type='equirectangular'
-            )
-        )
-
-
-    graph_two = []
-    df = prepare_geo()
-    df = df[['Country', 'Short', 'Deaths_per_100k']]
-    df.sort_values('Deaths_per_100k', ascending=False, inplace=True)
-
-    graph_two.append(
-        go.Choropleth(
-            locations = df['Short'],
-            z = df['Deaths_per_100k'],
-            text = df['Country'],
-            colorscale = 'Viridis_r',
-            #Viridis_r
             autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray',
@@ -320,8 +390,8 @@ def return_figures():
             )
         )
 
-    layout_two = dict(
-        title = 'All Countries: Deaths per 100,000 People',
+    layout_one = dict(
+        title = 'All Countries: Total deaths per 100,000 People',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -333,215 +403,12 @@ def return_figures():
 
 
 
-    graph_three = []
-    countrylist, df = prepare_time('Infected_percent', continent = '', top_n = 15)
 
-    df = df[df.Country.isin(countrylist)]
-
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Infected_percent.tolist()
-      graph_three.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
-
-    layout_three = dict(title = 'Percent of Population Infected',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Infected in percent'),
-                xaxis_rangeslider_visible=True)
-
-    graph_four = []
-    countrylist, df = prepare_time('Recovered_percent', continent = '', top_n = 15)
-
-    df = df[df.Country.isin(countrylist)]
-
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Recovered_percent.tolist()
-      graph_four.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
-
-    layout_four = dict(title = 'Percent of Population Recovered',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Recovered in percent'),
-                xaxis_rangeslider_visible=True)
-
-
-    graph_five = []
-    countrylist, df = prepare_time('Deaths_per_100k', continent = '', top_n = 15)
-
-    df = df[df.Country.isin(countrylist)]
-
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Deaths_per_100k.tolist()
-      graph_five.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
-
-    layout_five = dict(title = 'Deaths per 100,000',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Deaths'),
-                xaxis_rangeslider_visible=True)
-
-
-    graph_six = []
-    countrylist, df = prepare_time('Mortality_rate', continent = 'Europe', top_n = 15)
-
-    df = df[df.Country.isin(countrylist)]
-
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Mortality_rate.tolist()
-      graph_six.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
-
-    layout_six = dict(title = 'Mortality Rates Europe (work-in-progress)',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Percent'),
-                xaxis_rangeslider_visible=True)
-
-
-    graph_seven = []
-    df = prepare_bar('Deaths_per_100k', continent = 'America', top_n = 10)
-    df = df.sort_values('Deaths_per_100k', ascending=False)
-
-    graph_seven.append(
-      go.Bar(
-      y = df.Deaths_per_100k.tolist(),
-      x = df.Country.tolist(),
-      #orientation = 'h',
-      )
-    )
-
-    layout_seven = dict(title = 'America Ranked by Deaths per 100,000 People',
-                yaxis = dict(title = 'Deaths per 100k'),
-                xaxis = dict(title = ''),
-                )
-
-    graph_eight = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Europe', top_n = 25)
-    df = df.sort_values('Deaths_per_100k', ascending=False)
-
-    graph_eight.append(
-      go.Bar(
-      y = df.Deaths_per_100k.tolist(),
-      x = df.Country.tolist(),
-      #orientation = 'h',
-      )
-    )
-
-    layout_eight = dict(title = 'Europe Ranked by Deaths per 100,000 People',
-                yaxis = dict(title = 'Deaths per 100k'),
-                xaxis = dict(title = ''),
-                )
-
-
-    graph_nine = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Asia', top_n = 20)
-    df = df.sort_values('Deaths_per_100k', ascending=False)
-
-    graph_nine.append(
-      go.Bar(
-      y = df.Deaths_per_100k.tolist(),
-      x = df.Country.tolist(),
-      #orientation = 'h',
-      )
-    )
-
-    layout_nine = dict(title = 'Asia Ranked by Deaths per 100,000 People',
-                yaxis = dict(title = 'Deaths per 100k'),
-                xaxis = dict(title = ''),
-                )
-
-    graph_ten = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Africa', top_n = 10)
-    df = df.sort_values('Deaths_per_100k', ascending=False)
-
-    graph_ten.append(
-      go.Bar(
-      y = df.Deaths_per_100k.tolist(),
-      x = df.Country.tolist(),
-      #orientation = 'h',
-      )
-    )
-
-    layout_ten = dict(title = 'Africa Ranked by Deaths per 100,000 People',
-                yaxis = dict(title = 'Deaths per 100k'),
-                xaxis = dict(title = ''),
-                )
-
-    graph_eleven = []
-    df = prepare_bar('Deaths_per_100k', continent = 'Oceania', top_n = 3)
-    df = df.sort_values('Deaths_per_100k', ascending=False)
-
-    graph_eleven.append(
-      go.Bar(
-      y = df.Deaths_per_100k.tolist(),
-      x = df.Country.tolist(),
-      #orientation = 'h',
-      )
-    )
-
-    layout_eleven = dict(title = 'Oceania Ranked by Deaths per 100,000 People',
-                yaxis = dict(title = 'Deaths per 100k'),
-                xaxis = dict(title = ''),
-                )
-
-#    table_one = []
-#    df = prepare_bar('Deaths_per_100k', continent = 'Africa', top_n = 10)
-#    df = df.sort_values('Deaths_per_100k', ascending=False)
-#    df = df[['Short', 'Deaths_per_100k']]
-#    fig = go.Figure(data=[go.Table(
-#    header=dict(values=list(df.columns),
-#                fill_color='paleturquoise',
-#                align='left'),
-#    cells=dict(values=[df.Short, df.Deaths_per_100k],
-#               fill_color='lavender',
-#               align='left'))
-#
-#    ])
-
-    #table_one.append(
-#        fig
-#    )
 
     # append all charts to the figures list
     figures = []
-    figures.append(dict(data=graph_zero, layout=layout_zero))
+
     figures.append(dict(data=graph_one, layout=layout_one))
-    figures.append(dict(data=graph_two, layout=layout_two))
-    figures.append(dict(data=graph_three, layout=layout_three))
-    figures.append(dict(data=graph_four, layout=layout_four))
-    figures.append(dict(data=graph_five, layout=layout_five))
-    figures.append(dict(data=graph_six, layout=layout_six))
-    figures.append(dict(data=graph_seven, layout=layout_seven))
-    figures.append(dict(data=graph_eight, layout=layout_eight))
-    figures.append(dict(data=graph_nine, layout=layout_nine))
-    figures.append(dict(data=graph_ten, layout=layout_ten))
-    figures.append(dict(data=graph_eleven, layout=layout_eleven))
-    #figures.append(dict(data=table_one))
+
 
     return figures
