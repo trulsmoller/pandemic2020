@@ -632,13 +632,13 @@ def return_figures():
 
 
     graph_four = []
-    countrylist, df = prepare_time_weekly(top_n = ('Total_deaths_per_100k', 10))
+    countrylist, df = prepare_time_weekly(top_n = ('Deaths', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Total_deaths_per_100k.tolist()
+      y_val =  df[df['Country'] == country].Deaths.tolist()
       graph_four.append(
           go.Scatter(
           x = x_val,
@@ -648,7 +648,31 @@ def return_figures():
           )
       )
 
-    layout_four = dict(title = 'Deaths per week per 100,000 people',
+    layout_four = dict(title = 'Deaths',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
+
+
+    graph_five = []
+    countrylist, df = prepare_time_weekly(top_n = ('Deaths_week_per_100k', 1000))
+
+    country_list = ['Sweden', 'United States']
+    #df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Deaths_week_per_100k.tolist()
+      graph_five.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_five = dict(title = 'Deaths per week per 100,000 people',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
@@ -662,6 +686,7 @@ def return_figures():
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
+    figures.append(dict(data=graph_five, layout=layout_five))
 
 
     return figures
