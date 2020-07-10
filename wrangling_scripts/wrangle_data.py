@@ -655,9 +655,9 @@ def return_figures():
 
 
     graph_five = []
-    countrylist, df = prepare_time_weekly(continent='Europe', top_n = ('Infection_rate', 30))
+    countrylist, df = prepare_time_weekly(continent='Europe', top_n = ('Infection_rate', 3))
 
-    countrylist = ['Sweden', 'Norway']
+    #countrylist = ['Sweden', 'Norway']
     #df = df[df.Country.isin(countrylist)]
 
     for country in countrylist:
