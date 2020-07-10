@@ -156,7 +156,7 @@ def add_calculated_cols(df_merged):
     for code in country_codes:
 
         notgrouped = df[df['ISO'] == code]
-        notgrouped.set_index('Year_week')
+        
         notgrouped['Total_deaths_yesterday'] = notgrouped['Total_deaths'].shift(1).fillna(0)
         notgrouped['Deaths'] = notgrouped['Total_deaths'] - notgrouped['Total_deaths_yesterday']
         notgrouped['Shift1'] = notgrouped['Deaths'].shift(1).fillna(0)
@@ -168,7 +168,7 @@ def add_calculated_cols(df_merged):
         notgrouped['Deaths_s7'] = ((notgrouped['Deaths'] + notgrouped['Shift1'] + notgrouped['Shift2'] + \
                                   notgrouped['Shift3'] + notgrouped['Shift4'] + notgrouped['Shift5'] + \
                                   notgrouped['Shift6'])/7.0).astype(int)
-        notgrouped['Deaths_per_100k_s7'] = 100000*notgrouped['Deaths_s7']/(notgrouped['Population'] + 1.0)
+        #notgrouped['Deaths_per_100k_s7'] = 100000*notgrouped['Deaths_s7']/(notgrouped['Population'] + 1.0)
 
         notgrouped.drop(['Total_deaths_yesterday', 'Shift1', 'Shift2', 'Shift3', 'Shift4', 'Shift5', 'Shift6'], axis=1, inplace=True)
         notgrouped.set_index('Year_week', inplace=True)
