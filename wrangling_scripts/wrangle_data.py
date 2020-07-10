@@ -632,7 +632,7 @@ def return_figures():
 
 
     graph_four = []
-    countrylist, df = prepare_time_weekly(top_n = ('Deaths_week_per_100k', 10))
+    countrylist, df = prepare_time_weekly(top_n = ('Total_deaths_per_100k', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
