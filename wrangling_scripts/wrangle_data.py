@@ -421,6 +421,9 @@ def prepare_time(continent=None, top_n = (None, None)):
 
     df = dates_choice(df_full, all_dates=True)
 
+    # defining the beginning of time to be 9th of March 2020
+    df = df[df.index > '2020-03-08']
+
 
     # list of countries and number of countries
 
@@ -453,6 +456,76 @@ def prepare_time(continent=None, top_n = (None, None)):
 
     # filter df to only contain the countries in the countrylist
     df = df[df['Country'].isin(countrylist)].reset_index()
+
+    return countrylist, df
+
+
+def prepare_time_weekly(continent=None, top_n = (None, None)):
+    '''
+    This funtion gets the daily data suitable for time series plots - weekly version.
+    It is optional to filter on continent.
+    It is also optional to filter on the top n countries ranked on any of the following:
+
+    - Population
+    - Pop_km2
+    - Urban_Population_ratio
+    - Median_age
+    - Deaths
+    - Deaths_per_100k
+
+    Args:
+        continent (str) (optional): The continent ('America', 'Europe', 'Asia', 'Africa', 'Oceania')
+        top_n (tuple) (optional): First element (str): variable name to base the ranking on
+                        Second element (int): the n in top_n
+
+    Returns:
+        df_current (dataframe): dataframe with historic weekly data
+
+    '''
+
+    # getting the dataframe prepared with historic data
+
+    df_merged = merge_data()
+
+    df_full = add_calculated_cols(df_merged)
+
+    df = dates_choice(df_full, all_dates=False, weekly=True)
+
+    # defining the beginning of time to be 9th of March 2020
+    df = df[df.index > '2020-03-08']
+
+    # list of countries and number of countries
+
+    countries = df.Country.unique()
+
+    tot_countries = df.shape[0]
+
+    # setting a default (key) variable 'var' in case none is provided
+    var = 'Total_deaths'
+
+
+    # updating the key variable 'var' and 'n' from the input (optional)
+
+    if top_n[0] and top_n[1]:
+
+        var = top_n[0]
+        n = top_n[1]
+        if n > tot_countries:
+            n = tot_countries
+    else:
+        n = tot_countries
+
+
+    # make list of countries ordered by 'var' at the latest date
+    last_date = df.index.max()
+
+    df_last = df[df.index == last_date].sort_values(var, ascending=False)
+
+    countrylist = list(df_last['Country'][:n])
+
+    #df = df.reset_index()
+    df = df[df['Country'].isin(countrylist)]
+
 
     return countrylist, df
 
@@ -516,10 +589,36 @@ def return_figures():
           )
       )
 
-    layout_two = dict(title = 'Total deaths ranked',
+    layout_two = dict(title = 'Total deaths',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
+
+
+
+    graph_three = []
+    countrylist, df = prepare_time(top_n = ('Total_deaths_per_100k', 10))
+
+    #df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Total_deaths_per_100k.tolist()
+      graph_three.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_three = dict(title = 'Total deaths per 100,000 people',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
+
+
 
 
 
@@ -528,6 +627,7 @@ def return_figures():
 
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
+    figures.append(dict(data=graph_three, layout=layout_three))
 
 
     return figures
