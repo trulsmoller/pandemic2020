@@ -181,14 +181,13 @@ def add_calculated_cols(df_merged):
 
         regrouped = notgrouped.join(grouped)
 
-        #regrouped.rename(columns={"Deaths": "Deaths_week"}, inplace=True)
 
         country_dfs.append(regrouped)
 
     df_full = pd.concat(country_dfs)
 
     df_full['Deaths_per_100k'] = 100000*df_full['Deaths']/(df_full['Population'] + 1.0)
-    df_full['Deaths_week_per_100k'] = 100000*df_full['Deaths_week']/(df_full['Population'] + 1.0)
+    #df_full['Deaths_week_per_100k'] = 100000*df_full['Deaths_week']/(df_full['Population'] + 1.0)
 
     df_full.reset_index(inplace=True)
 
