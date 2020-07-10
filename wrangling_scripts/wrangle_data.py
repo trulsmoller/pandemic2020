@@ -523,7 +523,7 @@ def prepare_time_weekly(continent=None, top_n = (None, None)):
 
     countrylist = list(df_last['Country'][:n])
 
-    #df = df.reset_index()
+    df = df.reset_index()
     df = df[df['Country'].isin(countrylist)]
 
 
