@@ -632,7 +632,7 @@ def return_figures():
 
 
     graph_four = []
-    countrylist, df = prepare_time_weekly(top_n = ('Deaths', 10))
+    countrylist, df = prepare_time_weekly(top_n = ('Deaths_week_per_100k', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
@@ -655,14 +655,14 @@ def return_figures():
 
 
     graph_five = []
-    countrylist, df = prepare_time_weekly(top_n = ('Deaths_week_per_100k', 1000))
+    countrylist, df = prepare_time_weekly(continent='Europe', top_n = ('Infection_rate', 30))
 
-    country_list = ['Sweden', 'United States']
+    country_list = ['Sweden', 'Norway']
     #df = df[df.Country.isin(countrylist)]
 
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Deaths_week_per_100k.tolist()
+      y_val =  df[df['Country'] == country].Infection_rate.tolist()
       graph_five.append(
           go.Scatter(
           x = x_val,
@@ -672,9 +672,9 @@ def return_figures():
           )
       )
 
-    layout_five = dict(title = 'Deaths per week per 100,000 people',
+    layout_five = dict(title = 'Infection rate (R)',
                 xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Deaths'),
+                yaxis = dict(title = 'Infection rate'),
                 xaxis_rangeslider_visible=True)
 
 
