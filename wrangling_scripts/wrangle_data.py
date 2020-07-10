@@ -103,15 +103,13 @@ def get_covid_data(data_path):
 
 def merge_data():
     '''
-    This function unzips the compressed new data file found in the 'data' folder
-    in the root directory of the web app. Then the zip file is deleted.
+    This function get the population data and the covid-19 data and merges it to one dataframe
 
     Args:
-        file_name (str): name of covid-19 data file
-        file_path (str): path to covid-19 data file
+        None
 
     Returns:
-        this function does not return anything
+        df_merged (dataframe): merged data
     '''
 
     popdata_path = 'data/population_2020_for_johnhopkins_data.csv'
@@ -141,113 +139,137 @@ def add_calculated_cols(df_merged):
         df_merged (dataframe): df containing covid-19 data as well as population data
 
     Returns:
-        df_full (dataframe): With new columns added
+        df_full (dataframe): With new calculated columns added
     '''
+    df = df_merged.copy()
 
-    df_full = df_merged.copy()
+    df['Total_deaths_per_100k'] = 100000*df['Total_deaths']/(df['Population'] + 1.0)
 
-    df_full['Total_deaths_per_100k'] = 100000*df_full['Total_deaths']/(df_full['Population'] + 1.0)
+    df['Weekday'] = df['Date'].dt.weekday
 
-    df_full['Deaths'] = 0.0
-    df_full['Deaths_per_100k'] = 0.0
-    df_full['Deaths_s7'] = 0.0
-    df_full['Deaths_per_100k_s7'] = 0.0
-    df_full['Deaths_week'] = 0.0
-    df_full['Deaths_lastweek'] = 0.0
-    df_full['Infection_rate'] = 0.0
+    df['Year_week'] = df['Date'].dt.strftime('%G-%V')
 
-    country_list = df_full.Country.unique().tolist()
+    country_codes = df.ISO.unique().tolist()
 
-    for country in country_list:
+    country_dfs = []
 
+    for code in country_codes:
 
-        df_temp = df_full.loc[df_full.Country == country]
+        notgrouped = df[df['ISO'] == code]
+        notgrouped.set_index('Year_week')
+        notgrouped['Total_deaths_yesterday'] = notgrouped['Total_deaths'].shift(1).fillna(0)
+        notgrouped['Deaths'] = notgrouped['Total_deaths'] - notgrouped['Total_deaths_yesterday']
+        notgrouped.drop(['Total_deaths_yesterday'], axis=1, inplace=True)
+        notgrouped.set_index('Year_week', inplace=True)
 
-        df_temp['Shift1'] = df_temp.Total_deaths.shift(1).fillna(0)
-        df_temp['Deaths'] = df_temp['Total_deaths'] - df_temp['Shift1']
+        grouped = notgrouped.groupby(['Year_week']).sum()
+        grouped.rename(columns={"Deaths": "Deaths_week"}, inplace=True)
+        grouped['Deaths_lastweek'] = grouped['Deaths_week'].shift(1).fillna(0)
+        grouped['Infection_rate'] =  (grouped['Deaths_week'] / grouped['Deaths_lastweek']).fillna(0).replace(np.inf, 0)
+        grouped = grouped[['Deaths_week', 'Deaths_lastweek', 'Infection_rate']]
 
-        df_temp['Deaths_shift1'] = df_temp['Deaths'].shift(1).fillna(0)
-        df_temp['Deaths_shift2'] = df_temp['Deaths'].shift(2).fillna(0)
-        df_temp['Deaths_shift3'] = df_temp['Deaths'].shift(3).fillna(0)
-        df_temp['Deaths_shift4'] = df_temp['Deaths'].shift(4).fillna(0)
-        df_temp['Deaths_shift5'] = df_temp['Deaths'].shift(5).fillna(0)
-        df_temp['Deaths_shift6'] = df_temp['Deaths'].shift(6).fillna(0)
+        regrouped = notgrouped.join(grouped)
 
+        #regrouped.rename(columns={"Deaths": "Deaths_week"}, inplace=True)
 
+        country_dfs.append(regrouped)
 
+    df_full = pd.concat(country_dfs)
 
-        df_temp['Deaths_week'] = (df_temp['Deaths'] + df_temp['Deaths_shift1'] \
-                                     + df_temp['Deaths_shift2'] + df_temp['Deaths_shift3'] \
-                                     + df_temp['Deaths_shift4'] + df_temp['Deaths_shift5'] \
-                                     + df_temp['Deaths_shift6']).astype(int)
+    df_full['Deaths_per_100k'] = 100000*df_full['Deaths']/(df_full['Population'] + 1.0)
 
-        df_temp['Deaths_lastweek'] = df_temp['Deaths_week'].shift(7).fillna(0)
-
-        df_temp['Infection_rate'] = (df_temp['Deaths_week']/df_temp['Deaths_lastweek']).fillna(0).replace([np.inf, -np.inf], 0)
-
-        df_temp['Deaths_s7'] = (df_temp['Deaths_week']/7.0).astype(int)
-
-        df_temp.drop(['Shift1', 'Deaths_shift1', 'Deaths_shift2', 'Deaths_shift3', \
-                      'Deaths_shift4', 'Deaths_shift5', 'Deaths_shift6'], axis=1, inplace=True)
-
-
-        df_temp['Deaths_per_100k'] = 100000*df_temp['Deaths']/(df_temp['Population'] + 1.0)
-        df_temp['Deaths_per_100k_s7'] = 100000*df_temp['Deaths_s7']/(df_temp['Population'] + 1.0)
-
-        index_list = df_temp.index
-
-        for i in index_list:
-            df_full.loc[i,'Deaths'] = df_temp.loc[i,'Deaths']
-            df_full.loc[i,'Deaths_s7'] = df_temp.loc[i,'Deaths_s7']
-
-            df_full.loc[i,'Deaths_per_100k'] = df_temp.loc[i,'Deaths_per_100k']
-            df_full.loc[i,'Deaths_per_100k_s7'] = df_temp.loc[i,'Deaths_per_100k_s7']
-            df_full.loc[i,'Deaths_week'] = df_temp.loc[i,'Deaths_week']
-            df_full.loc[i,'Deaths_lastweek'] = df_temp.loc[i,'Deaths_lastweek']
-            df_full.loc[i,'Infection_rate'] = df_temp.loc[i,'Infection_rate']
-
+    df_full.reset_index(inplace=True)
 
     return df_full
 
-def dates_choice(df, all_dates=False, specific_date=None):
+
+def dates_choice(df, all_dates=False, weekly=False):
     '''
-    This function filters and transforms the dataset into one of two different dataset types
-    based on the True/False value provided as 'all_dates' argument:
+    This function selects dates based on input. There are three types
 
-    1. Historic data (all_dates=True)
-    2. Single date data (all_dates=False)
+    1. Historic daily data (all_dates=True)
+    2. Historic weekly data (weekly=True, all_dates=False)
+    2. Latest date data (weekly=False, all_dates=False)
 
-    The historic data will be suitable for performing time series analysis, and for this purpose
-    the columns 'New_deaths' and 'New_deaths_per_100k' are added. The latter is also smoothed
-    applying a 7-day moving average on the daily new deaths reported. This effectively removes
-    the weekly seasonality.
+    The historic data will be suitable for performing time series analysis.
 
-    The single date data will be suitable to look at the overall picture (such as accumulated death
-    count per country). By default the date will be the last date. However, one can also input
-    a 'specific_date' to override the default.
-
-    Note: The specific_date input will be ignored if used in combination with historic seach
-    (all_dates=True).
+    The latest date data will be suitable to look at the overall picture (such as accumulated death
+    count per country).
 
     Args:
         df (dataframe): df containing covid-19 data as well as population data
 
-        all_dates (boolean): Optional argument - True if you wish to get all the historic data
+        all_dates (boolean): Optional argument - True if you wish to get daily historic data
 
-        specific_date (string): Optional argument - If all_dates is False, you may input a 'yyyy-mm-dd'
-        string in order to override the default behaviour which gets you the latest date.
+        weekly (boolean): Optional argument - True if you wish to get historic weekly data
 
     Returns:
-        df_filtered (dataframe): Filtered dataframe with added attributes in case of the historic option.
+        df (dataframe): Based on choices
     '''
 
-    if not all_dates:
+    if all_dates:
 
-        if specific_date:
+        # No filtering required since all_dates is requested
 
-            df = df[df.Date == specific_date].reset_index(drop=True)
+        pass
+
+    else:
+
+        if weekly:
+
+            # we wish to filter on Sundays because that is always the last day of each 'Year_week'
+            # (for instance last day of week 20, 21, 22 etc. is always a Sunday). However, due to the
+            # fact that earlier applied function 'add_calculated_cols' does a simple groupby('Year_week')
+            # to obtain the aggregated weekly numbers, the first aggregation for each country will often
+            # be based on less than seven days. So before filtering we will change the value of those cases
+
+            for i in range(df.shape[0]):
+
+                # looping dataframe, which is sorted by country then date
+
+                # check if the current row is the first of a new country
+
+                if i == 0:
+
+                    new_country = True
+
+                else:
+
+                    if df.ISO[i] == df.ISO[i-1]:
+
+                        new_country = False
+
+                    else:
+
+                        new_country = True
+
+                # if it is we find the row of the first '6', which could be on the current row
+                # or any of the next six rows.
+                # We change its value unless the weekday is '0' (in which case the first '6' will
+                # be the seventh element, and we do not have to change its value)
+
+                if new_country:
+
+                    wd = df.Weekday[i]
+
+                    if wd > 0:
+
+                        diff = 6 - wd
+                        df.Weekday[i + diff] = 0
+
+            # Finally we filter the dataframe on Sundays
+
+            df = df[df.Weekday == 6]
+
         else:
+
+            # In this case we have neither asked for all dates nor weekly dates,
+            # which means we will get the last date only.
+
             df = df[df.Date == df.Date.max()].reset_index(drop=True)
+
+
+    # we set the dates as index and make sure it is in datetime format
 
     df = df.reset_index(drop=True).set_index('Date')
     df.index = pd.to_datetime(df.index, infer_datetime_format=True)
@@ -276,7 +298,7 @@ def select_continent(df, continent):
     return df_continent
 
 
-def rank_data(df_current, var, top_n = None):
+def rank_data(df_current, top_n = (None, None)):
     '''
     This function filters on the top n countries ranked on any of the following:
 
@@ -288,26 +310,37 @@ def rank_data(df_current, var, top_n = None):
     - Deaths_per_100k
 
     Args:
-        file_name (str): name of covid-19 data file
-        file_path (str): path to covid-19 data file
+        df_current (dataframe): dataframe with just the latest date
+        top_n (tuple): First element (str): variable name to base the ranking on
+                        Second element (int): the n in top_n
+
 
     Returns:
-        this function does not return anything
+        df (dataframe): ranked data
     '''
 
     var_list = ['Population', 'Pop_km2', 'Urban_Population_ratio', 'Median_age', 'Total_deaths', \
                 'Total_deaths_per_100k', 'Deaths', 'Deaths_per_100k', 'Deaths_s7', 'Deaths_per_100k_s7',
                 'Deaths_week', 'Deaths_lastweek', 'Infection_rate']
+
+    # unpack tuple
+
+    var = top_n[0]
+    n = top_n[1]
+
     assert var in var_list
 
-    if top_n:
-        tot_countries = df_current.shape[0]
-        if top_n > tot_countries:
-            top_n = tot_countries
+    # limiting n so that it is not more than the number of rows (capped)
 
-    df = df_current.sort_values(by=[var], ascending=False)[:top_n]
+    if n:
+        tot_countries = df_current.shape[0]
+        if n > tot_countries:
+            n = tot_countries
+
+    df = df_current.sort_values(by=[var], ascending=False)[:n]
 
     return df
+
 
 def prepare_barplot(continent=None, top_n = (None, None)):
     '''
@@ -323,18 +356,19 @@ def prepare_barplot(continent=None, top_n = (None, None)):
     - Deaths_per_100k
 
     Args:
-        file_name (str): name of covid-19 data file
-        file_path (str): path to covid-19 data file
+        continent (str): The continent ('America', 'Europe', 'Asia', 'Africa', 'Oceania')
+        top_n (tuple): First element (str): variable name to base the ranking on
+                        Second element (int): the n in top_n
 
     Returns:
-        this function does not return anything
+        df_current (dataframe): dataframe with just the latest date prepared for barplot
     '''
 
     df_merged = merge_data()
 
-    #df_full = add_calculated_cols(df_merged)
+    df_full = add_calculated_cols(df_merged)
 
-    df_current = dates_choice(df_merged, all_dates=False)
+    df_current = dates_choice(df_full)
 
     if continent:
         df_current = select_continent(df_current, continent)
@@ -350,12 +384,77 @@ def prepare_barplot(continent=None, top_n = (None, None)):
         assert top_n[0] in var_list, "First tuple element in 'top_n' must be in var_list and of type String"
         assert isinstance(top_n[1], int) == True, "Second tuple element in 'top_n' must of type Integer"
 
-        df_current = rank_data(df_current, top_n[0], top_n[1])
+        df_current = rank_data(df_current, top_n)
 
-    df_current = df_current.reset_index()
-    #.set_index('Country')
+    df_current = df_current.reset_index().set_index('Country')
 
     return df_current
+
+def prepare_time(continent=None, top_n = (None, None)):
+    '''
+    This funtion gets the daily data suitable for time series plots.
+    It is optional to filter on continent.
+    It is also optional to filter on the top n countries ranked on any of the following:
+
+    - Population
+    - Pop_km2
+    - Urban_Population_ratio
+    - Median_age
+    - Deaths
+    - Deaths_per_100k
+
+    Args:
+        continent (str) (optional): The continent ('America', 'Europe', 'Asia', 'Africa', 'Oceania')
+        top_n (tuple) (optional): First element (str): variable name to base the ranking on
+                        Second element (int): the n in top_n
+
+    Returns:
+        df_current (dataframe): dataframe with just the latest date prepared for barplot
+
+    '''
+
+    # getting the dataframe prepared with historic data
+
+    df_merged = merge_data()
+
+    df_full = add_calculated_cols(df_merged)
+
+    df = dates_choice(df_full, all_dates=True)
+
+
+    # list of countries and number of countries
+
+    countries = df.Country.unique()
+
+    tot_countries = df.shape[0]
+
+    # setting a default (key) variable 'var' in case none is provided
+    var = 'Total_deaths'
+
+
+    # updating the key variable 'var' and 'n' from the input (optional)
+
+    if top_n[0] and top_n[1]:
+
+        var = top_n[0]
+        n = top_n[1]
+        if n > tot_countries:
+            n = tot_countries
+    else:
+        n = tot_countries
+
+
+    # make list of countries ordered by 'var' at the latest date
+    last_date = df.index.max()
+
+    df_last = df[df.index == last_date].sort_values(var, ascending=False)
+
+    countrylist = list(df_last['Country'][:n])
+
+    # filter df to only contain the countries in the countrylist
+    df = df[df['Country'].isin(countrylist)].reset_index()
+
+    return countrylist, df
 
 
 def return_figures():
@@ -400,7 +499,27 @@ def return_figures():
             )
         )
 
+    graph_two = []
+    countrylist, df = prepare_time(top_n = ('Total_deaths', 15))
 
+    #df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Total_deaths.tolist()
+      graph_two.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_two = dict(title = 'Total deaths ranked',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
 
 
 
@@ -408,6 +527,7 @@ def return_figures():
     figures = []
 
     figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append(dict(data=graph_two, layout=layout_two))
 
 
     return figures
