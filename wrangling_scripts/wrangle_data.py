@@ -573,7 +573,7 @@ def return_figures():
         )
 
     graph_two = []
-    countrylist, df = prepare_time(top_n = ('Total_deaths', 15))
+    countrylist, df = prepare_time(top_n = ('Total_deaths', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
@@ -620,6 +620,28 @@ def return_figures():
 
 
 
+    graph_four = []
+    countrylist, df = prepare_time_weekly(top_n = ('Deaths_per_100k', 10))
+
+    #df = df[df.Country.isin(countrylist)]
+
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Total_deaths_per_100k.tolist()
+      graph_four.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
+
+    layout_four = dict(title = 'Deaths per week per 100,000 people',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
+
 
 
     # append all charts to the figures list
@@ -628,6 +650,7 @@ def return_figures():
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
+    figures.append(dict(data=graph_four, layout=layout_four))
 
 
     return figures
