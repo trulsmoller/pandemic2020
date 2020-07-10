@@ -404,8 +404,6 @@ def return_figures():
 
 
 
-
-
     # append all charts to the figures list
     figures = []
 
