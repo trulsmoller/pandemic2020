@@ -62,15 +62,8 @@ Downloaded once:
 
 #### Metrics    <a class="anchor" id="section_2_4"></a>
 
-Assumptions and comments given below each metric.
-
 
     1. 'Population'
-
-    Assumption: Population numbers are nearly static in the course of a few months
-
-    Comment: It's not perfect to use static numbers for population. However, it shouldn't be an issue over a few months. If the tracking is extended to last for years, it would be wise to update the population numbers, of course.
-
     2. 'Total_deaths'
     3. 'Total_deaths_per_100k' (derived from 'Total_deaths' and 'Population')
     4. 'Deaths'                (derived from 'Total_deaths', means new daily)
@@ -79,11 +72,6 @@ Assumptions and comments given below each metric.
     7. 'Deaths_per_100k_s7'    (derived from 'Deaths_per_100k')
     8. 'Deaths_week'           (derived from 'Deaths', means sum of new daily for the past 7 days)
     9. 'Deaths_lastweek'       (derived from 'Deaths', means sum of new daily for the past 14-8 days)
-
-    Assumption: Reported numbers on 'Total_deaths' are accurate
-
-    Comment: Again it's not a perfect assumption, as there are different practices in different countries on determining the cause of death. For instance, if someone who is confirmed to be infected dies of heart failure, it could be labeled as 'heart failure' even though the underlying reason was the corona virus. There are also countries not all of the population are registered as citizens; they are outside the system. However, mostly, the count of deaths is trustworthy and it will give a very good indication of the true number of casualties due to the virus.
-
     10. 'Infection_rate'       (derived from 'Deaths_week' and 'Deaths_lastweek')
 
     Assumption: R can be estimated from the ratio week-over-week deaths:
