@@ -618,7 +618,7 @@ def return_figures():
     df = prepare_barplot()
     df = df.reset_index()
     df = df[['Country', 'ISO', 'Total_deaths_per_100k']]
-    df.sort_values('Total_deaths', ascending=False, inplace=True)
+    df.sort_values('Total_deaths_per_100k', ascending=False, inplace=True)
 
     graph_three.append(
         go.Choropleth(
