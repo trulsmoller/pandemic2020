@@ -614,8 +614,39 @@ def return_figures():
                 xaxis_rangeslider_visible=True)
 
 
-
     graph_three = []
+    df = prepare_barplot()
+    df = df.reset_index()
+    df = df[['Country', 'ISO', 'Total_deaths']]
+    df.sort_values('Total_deaths', ascending=False, inplace=True)
+
+    graph_three.append(
+        go.Choropleth(
+            locations = df['ISO'],
+            z = df['Total_deaths'],
+            text = df['Country'],
+            colorscale = 'Viridis_r',
+            autocolorscale=False,
+            reversescale=True,
+            marker_line_color='darkgray',
+            marker_line_width=0.5,
+            colorbar_title = 'Deaths',
+            colorbar_ticksuffix = '',
+            )
+        )
+
+    layout_three = dict(
+        title = 'All Countries: Total deaths per 100,000',
+        geo=dict(
+            showframe=False,
+            showcoastlines=False,
+            projection_type='equirectangular'
+            )
+        )
+
+
+
+    graph_four = []
     countrylist, df = prepare_time(top_n = ('Total_deaths_per_100k', 10))
 
     #df = df[df.Country.isin(countrylist)]
@@ -623,31 +654,6 @@ def return_figures():
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
       y_val =  df[df['Country'] == country].Total_deaths_per_100k.tolist()
-      graph_three.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
-
-    layout_three = dict(title = 'Total deaths per 100,000 people - Top 10',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Deaths'),
-                xaxis_rangeslider_visible=True)
-
-
-
-    graph_four = []
-    list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
-    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Deaths_week_per_100k', 10))
-
-    #df = df[df.Country.isin(countrylist)]
-
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Deaths.tolist()
       graph_four.append(
           go.Scatter(
           x = x_val,
@@ -657,22 +663,22 @@ def return_figures():
           )
       )
 
-    layout_four = dict(title = 'Weekly Deaths per 100,000 people',
+    layout_four = dict(title = 'Total deaths per 100,000 people - Top 10',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
 
 
+
     graph_five = []
     list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
-    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Infection_rate', 4))
+    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Deaths_week_per_100k', 10))
 
-    #countrylist = ['Sweden', 'Norway']
     #df = df[df.Country.isin(countrylist)]
 
     for country in countrylist:
       x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Infection_rate.tolist()
+      y_val =  df[df['Country'] == country].Deaths.tolist()
       graph_five.append(
           go.Scatter(
           x = x_val,
@@ -682,10 +688,11 @@ def return_figures():
           )
       )
 
-    layout_five = dict(title = 'Infection rate (R)',
+    layout_five = dict(title = 'Weekly Deaths per 100,000 people',
                 xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Infection rate'),
+                yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
+
 
 
 
