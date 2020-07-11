@@ -563,6 +563,7 @@ def return_figures():
     graph_one = []
     df = prepare_barplot()
     df = df.reset_index()
+    current_date = df.Date.max()
     df = df[['Country', 'ISO', 'Total_deaths']]
     df.sort_values('Total_deaths', ascending=False, inplace=True)
 
@@ -582,7 +583,7 @@ def return_figures():
         )
 
     layout_one = dict(
-        title = 'All Countries: Total deaths',
+        title = 'All Countries: Total deaths (Last updated:' + str(current_date) + ')',
         geo=dict(
             showframe=False,
             showcoastlines=False,
