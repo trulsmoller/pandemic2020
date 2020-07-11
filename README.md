@@ -22,6 +22,8 @@ Webapp hosted on Heroku displaying Choropleth visualizations on a world map of t
 
 It is built with a Python 3 backend. Visualizations brought to the frontend using plotly, flask, js and bootstrap. Please see requirements.txt for detailed list of requirements.
 
+There is also a lot of exploration done in the Jupyter Notebook and some additional results and analysis, which are not on the web app.
+
 #### Project Overview  <a class="anchor" id="section_2_1"></a>
 
 The origin of the project were two things:
@@ -33,7 +35,6 @@ The origin of the project were two things:
 It seems important to get a sober picture and look into the data myself, and even learn some things about this aspect of the healthcare domain.
 
 The data will be the widely used dataset compiled by John Hopkins University. The data gets downloaded using a funtion in the Jupyter Notebook. It gets downloaded from a Kaggle user who has shared it there, but it comes originally from John Hopkins University.
-
 
 
 
