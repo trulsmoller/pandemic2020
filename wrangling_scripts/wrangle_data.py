@@ -471,7 +471,7 @@ def prepare_time(continent=None, top_n = (None, None)):
     return countrylist, df
 
 
-def prepare_time_weekly(continent=None, top_n = (None, None)):
+def prepare_time_weekly(list_countries=None, continent=None, top_n = (None, None)):
     '''
     This funtion gets the daily data suitable for time series plots - weekly version.
     It is optional to filter on continent.
@@ -494,9 +494,16 @@ def prepare_time_weekly(continent=None, top_n = (None, None)):
 
     '''
 
-    # getting the dataframe prepared with historic data
+    # getting the merged dataset
 
     df_merged = merge_data()
+
+    # filtering on list_countries if provided
+
+    if list_countries:
+        df_merged = df_merged[df_merged['Country'].isin(list_countries)]
+
+    # getting the dataframe prepared with historic data
 
     df_full = add_calculated_cols(df_merged)
 
@@ -584,7 +591,7 @@ def return_figures():
         )
 
     graph_two = []
-    countrylist, df = prepare_time(top_n = ('Total_deaths', 10))
+    countrylist, df = prepare_time(top_n = ('Total_deaths', 20))
 
     #df = df[df.Country.isin(countrylist)]
 
@@ -655,7 +662,8 @@ def return_figures():
 
 
     graph_five = []
-    countrylist, df = prepare_time_weekly(continent='Europe', top_n = ('Infection_rate', 3))
+    list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
+    countrylist, df = prepare_time_weekly(list_countries=list_countries, continent=None, top_n = ('Infection_rate', 4))
 
     #countrylist = ['Sweden', 'Norway']
     #df = df[df.Country.isin(countrylist)]
