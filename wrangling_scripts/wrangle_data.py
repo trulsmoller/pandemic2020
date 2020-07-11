@@ -591,7 +591,7 @@ def return_figures():
         )
 
     graph_two = []
-    countrylist, df = prepare_time(top_n = ('Total_deaths', 20))
+    countrylist, df = prepare_time(top_n = ('Total_deaths', 15))
 
     #df = df[df.Country.isin(countrylist)]
 
@@ -631,7 +631,7 @@ def return_figures():
           )
       )
 
-    layout_three = dict(title = 'Total deaths per 100,000 people',
+    layout_three = dict(title = 'Total deaths per 100,000 people - Top 10',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
@@ -639,7 +639,8 @@ def return_figures():
 
 
     graph_four = []
-    countrylist, df = prepare_time_weekly(top_n = ('Deaths_week_per_100k', 10))
+    list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
+    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Deaths_week_per_100k', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
@@ -655,7 +656,7 @@ def return_figures():
           )
       )
 
-    layout_four = dict(title = 'Deaths',
+    layout_four = dict(title = 'Weekly Deaths per 100,000 people',
                 xaxis = dict(title = 'Date'),
                 yaxis = dict(title = 'Deaths'),
                 xaxis_rangeslider_visible=True)
@@ -663,7 +664,7 @@ def return_figures():
 
     graph_five = []
     list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
-    countrylist, df = prepare_time_weekly(list_countries=list_countries, continent=None, top_n = ('Infection_rate', 4))
+    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Infection_rate', 4))
 
     #countrylist = ['Sweden', 'Norway']
     #df = df[df.Country.isin(countrylist)]
