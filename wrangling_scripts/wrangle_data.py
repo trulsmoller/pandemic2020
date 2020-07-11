@@ -583,7 +583,7 @@ def return_figures():
         )
 
     layout_one = dict(
-        title = 'All Countries: Total deaths (Last updated:' + str(current_date) + ')',
+        title = 'All Countries: Total deaths (Data last updated:' + str(current_date) + ')',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -617,13 +617,13 @@ def return_figures():
     graph_three = []
     df = prepare_barplot()
     df = df.reset_index()
-    df = df[['Country', 'ISO', 'Total_deaths']]
+    df = df[['Country', 'ISO', 'Total_deaths_per_100k']]
     df.sort_values('Total_deaths', ascending=False, inplace=True)
 
     graph_three.append(
         go.Choropleth(
             locations = df['ISO'],
-            z = df['Total_deaths'],
+            z = df['Total_deaths_per_100k'],
             text = df['Country'],
             colorscale = 'Viridis_r',
             autocolorscale=False,
