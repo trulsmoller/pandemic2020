@@ -563,7 +563,7 @@ def return_figures():
     graph_one = []
     df = prepare_barplot()
     df = df.reset_index()
-    current_date = df.Date.max()
+    current_date = df['Date'].astype(str).tolist()[-1]
     df = df[['Country', 'ISO', 'Total_deaths']]
     df.sort_values('Total_deaths', ascending=False, inplace=True)
 
