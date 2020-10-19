@@ -583,7 +583,7 @@ def return_figures():
         )
 
     layout_one = dict(
-        title = 'All Countries: Total deaths (Data last updated:' + str(current_date) + ')',
+        title = 'All Countries: Total deaths (Updated:' + str(current_date) + ')',
         geo=dict(
             showframe=False,
             showcoastlines=False,
@@ -676,22 +676,22 @@ def return_figures():
 
     #df = df[df.Country.isin(countrylist)]
 
-    for country in countrylist:
-      x_val = df[df['Country'] == country].Date.tolist()
-      y_val =  df[df['Country'] == country].Deaths.tolist()
-      graph_five.append(
-          go.Scatter(
-          x = x_val,
-          y = y_val,
-          mode = 'lines',
-          name = country
-          )
-      )
+    #for country in countrylist:
+    #  x_val = df[df['Country'] == country].Date.tolist()
+    #  y_val =  df[df['Country'] == country].Deaths.tolist()
+    #  graph_five.append(
+#          go.Scatter(
+#          x = x_val,
+#          y = y_val,
+#          mode = 'lines',
+#          name = country
+#          )
+#      )
 
-    layout_five = dict(title = 'Weekly Deaths per 100,000 people',
-                xaxis = dict(title = 'Date'),
-                yaxis = dict(title = 'Deaths'),
-                xaxis_rangeslider_visible=True)
+#    layout_five = dict(title = 'Weekly Deaths per 100,000 people',
+#                xaxis = dict(title = 'Date'),
+#                yaxis = dict(title = 'Deaths'),
+#                xaxis_rangeslider_visible=True)
 
 
 
@@ -703,7 +703,7 @@ def return_figures():
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
-    figures.append(dict(data=graph_five, layout=layout_five))
+    #figures.append(dict(data=graph_five, layout=layout_five))
 
 
     return figures
