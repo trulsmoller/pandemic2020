@@ -442,7 +442,8 @@ def prepare_time(continent=None, top_n = (None, None)):
 
     tot_countries = df.shape[0]
 
-
+    # setting a default (key) variable 'var' in case none is provided
+    var = 'Deaths_week'
 
 
     # updating the key variable 'var' and 'n' from the input (optional)
@@ -455,8 +456,7 @@ def prepare_time(continent=None, top_n = (None, None)):
             n = tot_countries
     else:
         n = tot_countries
-        # setting a default (key) variable 'var' in case none is provided
-        var = 'Total_deaths'
+
 
     # make list of countries ordered by 'var' at the latest date
     last_date = df.index.max()
