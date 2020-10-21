@@ -474,6 +474,8 @@ def prepare_time(continent=None, top_n = (None, None)):
 def prepare_time_weekly(list_countries=None, continent=None, top_n = (None, None)):
     '''
     This funtion gets the daily data suitable for time series plots - weekly version.
+    It is optional to explicitly list the countries to include, and, if so, you would probably
+    not need any further arguments.
     It is optional to filter on continent.
     It is also optional to filter on the top n countries ranked on any of the following:
 
@@ -485,6 +487,7 @@ def prepare_time_weekly(list_countries=None, continent=None, top_n = (None, None
     - Deaths_per_100k
 
     Args:
+        list_countries (list): list of countries to include (list of country names)
         continent (str) (optional): The continent ('America', 'Europe', 'Asia', 'Africa', 'Oceania')
         top_n (tuple) (optional): First element (str): variable name to base the ranking on
                         Second element (int): the n in top_n
@@ -671,27 +674,26 @@ def return_figures():
 
 
     graph_five = []
-    list_countries = ['Sweden', 'Norway', 'Denmark', 'Finland']
-    countrylist, df = prepare_time_weekly(list_countries=list_countries, top_n = ('Deaths_week_per_100k', 10))
+    countrylist, df = prepare_time_weekly(list_countries=None, top_n = ('Deaths_week', 10))
 
     #df = df[df.Country.isin(countrylist)]
 
-    #for country in countrylist:
-    #  x_val = df[df['Country'] == country].Date.tolist()
-    #  y_val =  df[df['Country'] == country].Deaths.tolist()
-    #  graph_five.append(
-#          go.Scatter(
-#          x = x_val,
-#          y = y_val,
-#          mode = 'lines',
-#          name = country
-#          )
-#      )
+    for country in countrylist:
+      x_val = df[df['Country'] == country].Date.tolist()
+      y_val =  df[df['Country'] == country].Deaths.tolist()
+      graph_five.append(
+          go.Scatter(
+          x = x_val,
+          y = y_val,
+          mode = 'lines',
+          name = country
+          )
+      )
 
-#    layout_five = dict(title = 'Weekly Deaths per 100,000 people',
-#                xaxis = dict(title = 'Date'),
-#                yaxis = dict(title = 'Deaths'),
-#                xaxis_rangeslider_visible=True)
+    layout_five = dict(title = 'Weekly Deaths - Top 10',
+                xaxis = dict(title = 'Date'),
+                yaxis = dict(title = 'Deaths'),
+                xaxis_rangeslider_visible=True)
 
 
 
@@ -703,7 +705,7 @@ def return_figures():
     figures.append(dict(data=graph_two, layout=layout_two))
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))
-    #figures.append(dict(data=graph_five, layout=layout_five))
+    figures.append(dict(data=graph_five, layout=layout_five))
 
 
     return figures
